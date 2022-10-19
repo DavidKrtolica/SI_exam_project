@@ -1,0 +1,23 @@
+{
+  "name": "si_exam_project",
+  "description": "Repository for the System Integration class, 2nd semester of Software Development Top-Up degree at KEA.",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DavidKrtolica/SI_exam_project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DavidKrtolica/SI_exam_project/issues"
+  },
+  "homepage": "https://github.com/DavidKrtolica/SI_exam_project#readme",
+  "dependencies": {
+    "ftp-srv": "^4.6.2"
+  }
+}
