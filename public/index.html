@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        /* Create three equal columns that floats next to each other */
+        .column {
+            float: left;
+            width: 33.33%;
+            padding: 10px;
+            height: 300px;
+            /* Should be removed. Only for demonstration */
+        }
+
+        /* Clear floats after the columns */
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+        .flex-container {
+            display: flex;
+        }
+
+        .flex-child {
+            width: 150px;
+            margin-right: 10px;
+        }
+
+        .notification {
+            color: red;
+            margin-top:10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h4>Join a room</h4>
+    <div class="flex-container">
+        <input id="inputName" class="flex-child" placeholder="Name">
+        <button class="flex-child" onclick="joinRequest()">Join</button>
+    </div>
+
+    <h4>Send an invitation</h4>
+    <div class="flex-container">
+        <input class="flex-child" id="inviteName" placeholder="Name">
+        <input class="flex-child" id="inviteEmail" placeholder="Email">
+        <button class="flex-child" onclick="sendInvitation()">Send</button>
+    </div>
+    
+    <text id="notification" class="notification"></text>
+
+    <br><br>
+
+    <div class="row">
+        <div class="column" style="background-color:#B0FC38;">
+            <h2>Online</h2>
+            <ul id="online"></ul>
+        </div>
+        <div class="column" style="background-color: #FF2400;">
+            <h2>Offline</h2>
+            <ul id="offline"></ul>
+        </div>
+        <div class="column" id="not-registered" style="background-color:#D3D3D3;">
+            <h2>Not registered</h2>
+            <ul id="not-registered"></ul>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.1.2/socket.io.min.js" integrity="sha384-toS6mmwu70G0fw54EGlWWeA4z3dyJ+dlXBtSURSKN4vyRFOcxd3Bzjj/AoOwY+Rg" crossorigin="anonymous"></script>
+    
+    <script>
+        const socket = io();
+
+        let notificationText = document.getElementById('notification');
+
+        const joinRequest = () => {
+            notificationText.innerText = '';
+            const name = document.getElementById('inputName').value;
+            socket.emit('joinRequest', { name, room: 'SW2022' });
+        }
+
+        socket.on('error', (errorMessage) => {
+            notificationText.innerText = errorMessage;
+        })
+
+        socket.on('roomData', (roomData) => {
+            document.querySelectorAll('li').forEach(e => e.remove());
+            roomData.users.map((user) => {
+                const node = document.createElement('li');
+                node.appendChild(document.createTextNode(user.name));
+                if (user.socketId) {
+                    document.getElementById('online').appendChild(node);
+                } else if (user.registered) {
+                    document.getElementById('offline').appendChild(node);
+                } else {
+                    document.getElementById('not-registered').appendChild(node);
+                }
+            });
+        })
+
+        const sendInvitation = () => {
+            const name = document.getElementById('inviteName').value;
+            const email = document.getElementById('inviteEmail').value;
+
+            if (!name || !email) {
+                notificationText.innerText = 'Invalid input!'
+                return;
+            }
+
+            fetch('http://localhost:8080/invite', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, email }),
+            }).then((response) => {
+                return response.json();
+            }).then((data) => {
+                notificationText.innerText = ''
+            }).catch((error) => {
+                notificationText.innerText = `An error occured.`;
+            });
+        }
+
+    </script>
+</body>
+
+</html>
