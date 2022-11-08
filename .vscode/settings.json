@@ -1,8 +1,4 @@
 {
-    "appService.zipIgnorePattern": [
-        "node_modules{,/**}",
-        ".vscode{,/**}"
-    ],
-    "appService.defaultWebAppToDeploy": "/subscriptions/eeb359bd-b0d8-41a3-87a6-74bdc511932d/AppServices/subscriptions/eeb359bd-b0d8-41a3-87a6-74bdc511932d/resourceGroups/test-si/providers/Microsoft.Web/sites/auth-api-yggdrasil",
+    "appService.defaultWebAppToDeploy": "/subscriptions/1e9b383a-4124-4a41-8bd5-6efceeb25b1d/AppServices/subscriptions/1e9b383a-4124-4a41-8bd5-6efceeb25b1d/resourceGroups/rg-si-exam/providers/Microsoft.Web/sites/authentication-service-si",
     "appService.deploySubpath": "."
 }

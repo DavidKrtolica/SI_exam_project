@@ -57,6 +57,7 @@ app.post("/auth/register", (req, res) => {
         })
         .catch((error) => {
             //HERE WE CATCH THE ERROR IF USER NOT CREATED
+            //TODO: ERROR HANDLING FOR WEAK PASSWORD (< 6 CHARS)
             if (error.code == "auth/email-already-in-use") {
                 res.status(409).json({
                     status: "Failed",
