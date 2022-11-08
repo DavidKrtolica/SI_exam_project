@@ -80,13 +80,8 @@ app.post("/auth/login", (req, res) => {
         .then((response) => {
             const accessToken = response.user.stsTokenManager.accessToken;
             const refreshToken = response.user.stsTokenManager.refreshToken;
-            console.log('user === ', response.user);
-            // How are we going to handle authentication in general?
-            // When a service that requires authentication receives a request,
-            // it will decode the access token and 
-
             // const resAccessToken = await response.user.getIdToken();
-            res.status(201).json({
+            res.status(200).json({
                 status: "Success",
                 data: {
                     accessToken,
@@ -151,7 +146,7 @@ app.post("/auth/refreshToken", (req, res) => {
             data: {
                 accessToken: firebaseRes.data.access_token,
                 refreshToken: firebaseRes.data.refresh_token,
-                expiresIn: firebaseRes.data.expires_in,
+                expiresIn: firebaseRes.data.expires_in, // 3600 milliseconds
             }
         });
     }).catch((firebaseRes) => {
@@ -166,7 +161,7 @@ app.post("/auth/refreshToken", (req, res) => {
 
 //ENDPOINT FOR ACCEPTING AN INVITE SENT TO A USER VIA EMAIL-SERVICE
 app.get("/", (req, res) => {
-    res.send({ "text": "Hello World!" });
+    res.send({ "text": "Hello World!!!" });
 });
 
 const port = process.env.PORT || 3000;
