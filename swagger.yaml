@@ -11,25 +11,24 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   version: 1.0.11
 servers:
-  - url: https://auth-api-yggdrasil.azurewebsites.net
+  - url: https://authentication-service-si.azurewebsites.net
 paths:
   /auth/register:
     post:
-      summary: Update an existing pet
-      description: Update an existing pet by Id
-      operationId: updatePet
+      summary: Create/Register a new user 
+      description: User Registration 
       requestBody:
-        description: Update an existent pet in the store
+        description: Define User credentials - email & password
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Pet'
+              $ref: '#/components/schemas/User'
           application/xml:
             schema:
-              $ref: '#/components/schemas/Pet'
+              $ref: '#/components/schemas/User'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/Pet'
+              $ref: '#/components/schemas/User'
         required: true
       responses:
         '200':
@@ -37,111 +36,76 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Pet'          
+                $ref: '#/components/schemas/UserSuccess'          
             application/xml:
               schema:
-                $ref: '#/components/schemas/Pet'
-        '400':
-          description: Invalid ID supplied
-        '404':
-          description: Pet not found
-        '405':
-          description: Validation exception
-      security:
-        - petstore_auth:
-            - write:pets
-            - read:pets
+                $ref: '#/components/schemas/UserSuccess'
+        '409':
+          description: Email Already Exists
+        '500':
+          description: Failed - Weak Password || Internal Server Error
   /auth/login:
     post:
-      summary: Finds Pets by status
-      description: Multiple status values can be provided with comma separated strings
-      operationId: findPetsByStatus
-      parameters:
-        - name: status
-          in: query
-          description: Status values that need to be considered for filter
-          required: false
-          explode: true
-          schema:
-            type: string
-            default: available
-            enum:
-              - available
-              - pending
-              - sold
+      summary: Login using User Credentials
+      description: Login using email & password Authentication
+      requestBody:
+        description: Use existing User credentials - email & password
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+        required: true
       responses:
         '200':
-          description: successful operation
+          description: Success
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Pet'          
+                $ref: '#/components/schemas/UserLoginSuccess'          
             application/xml:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Pet'
-        '400':
-          description: Invalid status value
-      security:
-        - petstore_auth:
-            - write:pets
-            - read:pets
+                $ref: '#/components/schemas/UserLoginSuccess'
+        '401':
+          description: Unauthorized - User Not Found || Wrong Password
+        '500':
+          description: Failed - Internal Server Error
   /auth/refreshToken:
     post:
-      summary: Finds Pets by tags
-      description: Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
-      operationId: findPetsByTags
-      parameters:
-        - name: tags
-          in: query
-          description: Tags to filter by
-          required: false
-          explode: true
-          schema:
-            type: array
-            items:
-              type: string
+      summary: Refresh and get new Access Token
+      description: Endpoint calling the Firebase service which refreshes the access token.
       responses:
         '200':
-          description: successful operation
+          description: Success
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Pet'          
-            application/xml:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Pet'
-        '400':
-          description: Invalid tag value
-      security:
-        - petstore_auth:
-            - write:pets
-            - read:pets
+                $ref: '#/components/schemas/NewTokens' 
+        '500':
+          description: Error
   /auth/logout:
-    get:
-      summary: Logs out current logged in user session
-      description: ''
-      operationId: logoutUser
-      parameters: []
+    post:
+      summary: Logs out current logged-in user session
+      description: 'Endpoint for Firebase log-out function.'
       responses:
-        default:
-          description: successful operation
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogoutSuccess'
+        '500':
+          description: Error
 components:
   schemas:
     User:
       type: object
       properties:
-        id:
-          type: integer
-          format: int64
-          example: 10
         username:
           type: string
           example: theUser
@@ -160,53 +124,72 @@ components:
         phone:
           type: string
           example: '12345'
-        userStatus:
-          type: integer
-          description: User Status
-          format: int32
-          example: 1
       xml:
         name: user
-    ApiResponse:
+    UserSuccess:
+        type: object
+        properties:
+          status:
+            type: string
+            example: 'Success'
+          data:
+            type: object
+            properties:
+              email:
+                type: string
+                example: 'john@email.com'
+              id:
+                type: string
+                example: 'BlKfPmPw7TSEEqg8aV2IjOzv1902'
+    UserLogin:
       type: object
       properties:
-        code:
-          type: integer
-          format: int32
-        type:
+        email:
           type: string
-        message:
+          example: john@email.com
+        password:
           type: string
-      xml:
-        name: '##default'
-  requestBodies:
-    Pet:
-      description: Pet object that needs to be added to the store
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Pet'
-        application/xml:
-          schema:
-            $ref: '#/components/schemas/Pet'
-    UserArray:
-      description: List of user object
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/User'
-  securitySchemes:
-    petstore_auth:
-      type: oauth2
-      flows:
-        implicit:
-          authorizationUrl: https://petstore3.swagger.io/oauth/authorize
-          scopes:
-            write:pets: modify pets in your account
-            read:pets: read your pets
-    api_key:
-      type: apiKey
-      name: api_key
-      in: header
+          example: '12345'
+    UserLoginSuccess:
+        type: object
+        properties:
+          status:
+            type: string
+            example: 'Success'
+          data:
+            type: object
+            properties:
+              accessToken:
+                type: string
+                example: 'eyJhbGciOiJSUzI1NiIsImtpZCI6ImQ3YjE5MTI0MGZjZmYzMDdkYzQ3NTg1OWEyYmUzNzgzZGMxYWY4OWYiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vYXV0aC1zZXJ2aWNlLXNpIiwiYXVkIjoiYXV0aC1zZXJ2aWNlLXNpIiwiYXV0aF90aW1lIjoxNjY3OTIzNTAzLCJ1c2VyX2lkIjoiRHBvODVhT0VsVE5DRWJZZWt3RElmMTBOQW00MyIsInN1YiI6IkRwbzg1YU9FbFROQ0ViWWVrd0RJZjEwTkFtNDMiLCJpYXQiOjE2Njc5MjM1MDMsImV4cCI6MTY2NzkyNzEwMywiZW1haWwiOiJka0BlbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZW1haWwiOlsiZGtAZW1haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoicGFzc3dvcmQifX0.F6qAak2zJ-XL4GBao0Ur2fw-1hV4T-_wKE87V5murEWLScM8iFM5afKhBp3J6pyDnNwMii9xa3WopFRZgtZz2lAtz0uef2azlwxRItytiiOHw-s9EfMsEn1vDOaN6BZfmnI3Tf86zbQMoXHhbAR-aXs39fVQdQgdKIo9Btf8HA54ncpziyd2LRcXsuvXkXKyPpf1lNN5ihah4BfirLDQaGMPNwKFX61E3onhIcqgr64hgypxa3lTI88cDIAr_c_sxiuiDsNQHkcqFqRF6TBbAr1GSILX_dEEoRBWWO0_5c4oW3DIvPZMArSFOYciOVB_EvHpAu40QEBQMlB-bee_Vw'
+              refreshToken:
+                type: string
+                example: 'AOkPPWQxRqzOrvAxsGTnlEkCmMMHZYtT6kCO29AiCZX2l8eRU1Kyb4BPPmGmWJZ7ceTuF77LjMiMEP7o3JwCZvPrE68kkG0qdD1sUCVCzDTDASkQzk_aRfwhKUxZHtiUIdkJzkOGVbTDq1T7XwOJGwmSeADut3aKrvY-vxyblLqV_qbTnQ7feaNg7uKjCVjsSO6SxHbsVPhT_IV78V-MHY6znFx-c_Ci1g'
+    NewTokens:
+        type: object
+        properties:
+          status:
+            type: string
+            example: 'Success'
+          data:
+            type: object
+            properties:
+              accessToken:
+                type: string
+                example: 'eyJhbGciOiJSUzI1NiIsImtpZCI6ImQ3YjE5MTI0MGZjZmYzMDdkYzQ3NTg1OWEyYmUzNzgzZGMxYWY4OWYiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vYXV0aC1zZXJ2aWNlLXNpIiwiYXVkIjoiYXV0aC1zZXJ2aWNlLXNpIiwiYXV0aF90aW1lIjoxNjY3OTIzNTAzLCJ1c2VyX2lkIjoiRHBvODVhT0VsVE5DRWJZZWt3RElmMTBOQW00MyIsInN1YiI6IkRwbzg1YU9FbFROQ0ViWWVrd0RJZjEwTkFtNDMiLCJpYXQiOjE2Njc5MjM1MDMsImV4cCI6MTY2NzkyNzEwMywiZW1haWwiOiJka0BlbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZW1haWwiOlsiZGtAZW1haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoicGFzc3dvcmQifX0.F6qAak2zJ-XL4GBao0Ur2fw-1hV4T-_wKE87V5murEWLScM8iFM5afKhBp3J6pyDnNwMii9xa3WopFRZgtZz2lAtz0uef2azlwxRItytiiOHw-s9EfMsEn1vDOaN6BZfmnI3Tf86zbQMoXHhbAR-aXs39fVQdQgdKIo9Btf8HA54ncpziyd2LRcXsuvXkXKyPpf1lNN5ihah4BfirLDQaGMPNwKFX61E3onhIcqgr64hgypxa3lTI88cDIAr_c_sxiuiDsNQHkcqFqRF6TBbAr1GSILX_dEEoRBWWO0_5c4oW3DIvPZMArSFOYciOVB_EvHpAu40QEBQMlB-bee_Vw'
+              refreshToken:
+                type: string
+                example: 'AOkPPWQxRqzOrvAxsGTnlEkCmMMHZYtT6kCO29AiCZX2l8eRU1Kyb4BPPmGmWJZ7ceTuF77LjMiMEP7o3JwCZvPrE68kkG0qdD1sUCVCzDTDASkQzk_aRfwhKUxZHtiUIdkJzkOGVbTDq1T7XwOJGwmSeADut3aKrvY-vxyblLqV_qbTnQ7feaNg7uKjCVjsSO6SxHbsVPhT_IV78V-MHY6znFx-c_Ci1g'  
+              expiresIn:
+                type: integer
+                format: int32
+                example: 3600
+    LogoutSuccess:
+        type: object
+        properties:
+          status:
+            type: string
+            example: 'Success'
+          desc:
+            type: string
+            example: 'Logged-out'

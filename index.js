@@ -1,11 +1,10 @@
 import express from "express";
 import { initializeApp } from "firebase/app";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import axios from 'axios';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 
-const swaggerDocument = YAML.load('./swagger.yaml');
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -16,30 +15,22 @@ const firebaseConfig = {
     messagingSenderId: "407495336479",
     appId: "1:407495336479:web:965b053cbe9a83d8e2eb2a"
 };
-
 // Initialize Firebase
 const firebaseApp = initializeApp(firebaseConfig);
-
 // Initialize Firebase Authentication and get a reference to the service
 const firebaseAuth = getAuth(firebaseApp);
 
 // Setup and Node Express server
 const app = express();
-
 app.use(express.json());
 
+//SWAGGER DOCUMENTATION FOR API ENDPOINTS
+const swaggerDocument = YAML.load('./swagger.yaml');
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 //ENDPOINT FOR SIGNING-UP (REGISTRATION) - "firebase.auth().createUserWithEmailAndPassword(email, password).then()"
 //AFTER WHICH WE ALSO NEED TO REGISTER THE USER AND MAKE A QUERY USING OUR GRAPHQL SERVICE TO SAVE A USER
 //CLIENT (REACT SIGN-UP FORM POST REQUEST) SEND A REQUEST WITH BODY CONTAINING USER INFO
-/* 
-    userData: {
-        email: "example@email.com",
-        password: "example123",
-        firstName, lastName...
-    }
-*/
 app.post("/auth/register", (req, res) => {
     const newUser = req.body;
     createUserWithEmailAndPassword(firebaseAuth, newUser.email, newUser.password)
@@ -57,11 +48,15 @@ app.post("/auth/register", (req, res) => {
         })
         .catch((error) => {
             //HERE WE CATCH THE ERROR IF USER NOT CREATED
-            //TODO: ERROR HANDLING FOR WEAK PASSWORD (< 6 CHARS)
             if (error.code == "auth/email-already-in-use") {
                 res.status(409).json({
                     status: "Failed",
                     description: "Email Already Exists"
+                });
+            } else if (error.code == "auth/weak-password") {
+                res.status(500).json({
+                    status: "Failed",
+                    description: "Weak Password"
                 });
             } else {
                 res.status(500).json({
@@ -140,7 +135,6 @@ const refreshTokenRequest = (req) => {
 }
 
 app.post("/auth/refreshToken", (req, res) => {
-
     refreshTokenRequest(req).then((firebaseRes) => {
         res.status(200).json({
             status: "Success",
@@ -156,6 +150,21 @@ app.post("/auth/refreshToken", (req, res) => {
             data: {
                 firebaseRes
             }
+        });
+    });
+});
+
+//ENDPOINT FOR LOGGING THE USER OUT OF THEIR FIREBASE PROFILE
+app.post("/auth/logout", (req, res) => {
+    signOut(firebaseAuth).then(() => {
+        res.status(200).json({
+            status: "Success",
+            desc: "Logged-out"
+        });
+    }).catch((err) => {
+        res.status(500).json({
+            status: "Error",
+            data: { err }
         });
     });
 });
