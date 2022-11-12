@@ -101,6 +101,24 @@ paths:
                 $ref: '#/components/schemas/LogoutSuccess'
         '500':
           description: Error
+  /auth/acceptInvite:
+    get:
+      summary: Accept an invite endpoint, with a code parameter.
+      description: Endpoint for a non-existing User to accept an email-invite and register himself.
+      parameters:
+        - in: query
+          name: code
+          type: string
+          required: true
+      responses:
+        '307':
+          description: 'Success - redirects to Client Register Page.'
+        '404':
+          description: 'Error - Code Not Valid.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InviteFailed'
 components:
   schemas:
     User:
@@ -184,12 +202,21 @@ components:
                 type: integer
                 format: int32
                 example: 3600
-    LogoutSuccess:
+    LogoutSuccess:  
         type: object
         properties:
           status:
             type: string
             example: 'Success'
-          desc:
+          description:
             type: string
             example: 'Logged-out'
+    InviteFailed:
+        type: object
+        properties:
+          status:
+            type: string
+            example: 'Error'
+          description:
+            type: string
+            example: 'Code Not Valid'
