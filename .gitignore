@@ -117,4 +117,7 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
+# firebase
+auth-service-si-firebase-adminsdk-nzwji-536e5befe9.json
+
 # End of https://mrkandreev.name/snippets/gitignore-generator/#Node
