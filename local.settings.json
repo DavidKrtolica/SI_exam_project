@@ -1,0 +1,18 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "WEBSITE_SLOT_NAME": "Production",
+    "FUNCTIONS_EXTENSION_VERSION": "~4",
+    "ScmType": "None",
+    "yggrasil_STORAGE": "DefaultEndpointsProtocol=https;AccountName=yggrasil;AccountKey=IgF2r6e2XexC9NHfXrZ7tY1jCAmpfLipDMgD5Il7EmSM0WPRADgPCAvJGtxkPv7ZCu88LuQODPRH+AStFRptMQ==",
+    "WEBSITE_AUTH_ENABLED": "False",
+    "APPLICATIONINSIGHTS_CONNECTION_STRING": "InstrumentationKey=0d6bb48b-aa1f-4e12-905b-d0601d351bd0;IngestionEndpoint=https://northeurope-2.in.applicationinsights.azure.com/;LiveEndpoint=https://northeurope.livediagnostics.monitor.azure.com/",
+    "APPINSIGHTS_INSTRUMENTATIONKEY": "0d6bb48b-aa1f-4e12-905b-d0601d351bd0",
+    "WEBSITE_NODE_DEFAULT_VERSION": "16.16.0",
+    "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "DefaultEndpointsProtocol=https;AccountName=yggrasil;AccountKey=IgF2r6e2XexC9NHfXrZ7tY1jCAmpfLipDMgD5Il7EmSM0WPRADgPCAvJGtxkPv7ZCu88LuQODPRH+AStFRptMQ==;EndpointSuffix=core.windows.net",
+    "WEBSITE_CONTENTSHARE": "save-products-from-file9726",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "WEBSITE_SITE_NAME": "save-products-from-file",
+    "AzureWebJobsStorage": "DefaultEndpointsProtocol=https;AccountName=yggrasil;AccountKey=IgF2r6e2XexC9NHfXrZ7tY1jCAmpfLipDMgD5Il7EmSM0WPRADgPCAvJGtxkPv7ZCu88LuQODPRH+AStFRptMQ==;EndpointSuffix=core.windows.net"
+  }
+}

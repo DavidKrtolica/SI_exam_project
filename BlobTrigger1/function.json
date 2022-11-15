@@ -1,0 +1,25 @@
+﻿{
+  "bindings": [
+    {
+      "name": "myBlob",
+      "path": "products/{name}",
+      "connection": "yggrasil_STORAGE",
+      "direction": "in",
+      "type": "blobTrigger"
+    },
+    {
+      "name": "myInputBlob",
+      "path": "products/products.db",
+      "connection": "yggrasil_STORAGE",
+      "direction": "in",
+      "type": "blob"
+    },
+    {
+      "name": "outputSbMsg",
+      "direction": "out",
+      "type": "serviceBus",
+      "connection": "service-bus-yggdrasil_RootManageSharedAccessKey_SERVICEBUS",
+      "queueName": "products-queue"
+    }
+  ]
+}
