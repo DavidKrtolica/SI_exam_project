@@ -4,6 +4,7 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, si
 import axios from 'axios';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
+import cors from 'cors';    
 
 
 //Firebase configuration
@@ -20,17 +21,15 @@ const firebaseApp = initializeApp(firebaseConfig);
 // Initialize Firebase Authentication and get a reference to the service
 const firebaseAuth = getAuth(firebaseApp);
 
-// Setup and Node Express server
+// Setup and Node Express server with CORS
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 //SWAGGER DOCUMENTATION FOR API ENDPOINTS
 const swaggerDocument = YAML.load('./swagger.yaml');
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-//CORS FOR ALLOWING ALL CLIENTS TO ACCESS THE POST REQUESTS
-const cors = require('cors');
-app.use(cors());
 
 //ENDPOINT FOR SIGNING-UP (REGISTRATION) - "firebase.auth().createUserWithEmailAndPassword(email, password).then()"
 //AFTER WHICH WE ALSO NEED TO REGISTER THE USER AND MAKE A QUERY USING OUR GRAPHQL SERVICE TO SAVE A USER
