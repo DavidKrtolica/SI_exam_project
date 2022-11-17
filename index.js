@@ -8,6 +8,10 @@ app.get("/register", (req, res) => {
     res.sendFile(__dirname + "/public/register.html");
 });
 
+app.get("/login", (req, res) => {
+    res.sendFile(__dirname + "/public/login.html");
+});
+
 const PORT = process.env.PORT || 8080
 const server = app.listen(PORT, error => {
     if (error) {
