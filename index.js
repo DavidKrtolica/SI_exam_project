@@ -5,11 +5,11 @@ app.use(express.json());
 app.use(express.static('public'));
 
 app.get("/register", (req, res) => {
-    res.sendFile(__dirname+"/public/register.html");
+    res.sendFile(__dirname+"/public/register/register.html");
 });
 
 app.get("/login", (req, res) => {
-    res.sendFile(__dirname+"/public/login.html");
+    res.sendFile(__dirname+"/public/login/login.html");
 });
 
 const PORT = process.env.PORT || 8080
