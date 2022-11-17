@@ -28,6 +28,10 @@ app.use(express.json());
 const swaggerDocument = YAML.load('./swagger.yaml');
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
+//CORS FOR ALLOWING ALL CLIENTS TO ACCESS THE POST REQUESTS
+const cors = require('cors');
+app.use(cors());
+
 //ENDPOINT FOR SIGNING-UP (REGISTRATION) - "firebase.auth().createUserWithEmailAndPassword(email, password).then()"
 //AFTER WHICH WE ALSO NEED TO REGISTER THE USER AND MAKE A QUERY USING OUR GRAPHQL SERVICE TO SAVE A USER
 //CLIENT (REACT SIGN-UP FORM POST REQUEST) SEND A REQUEST WITH BODY CONTAINING USER INFO
