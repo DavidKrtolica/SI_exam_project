@@ -4,6 +4,10 @@ const app = express();
 app.use(express.json());
 app.use(express.static('public'));
 
+app.get("/", (req, res) => {
+    res.redirect("/login");
+});
+
 app.get("/register", (req, res) => {
     res.sendFile(__dirname+"/public/register/register.html");
 });
