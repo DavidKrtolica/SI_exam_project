@@ -1,11 +1,14 @@
 import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
-import { typeDefs, resolvers } from './gql/gql.js';
 import { BlobServiceClient } from '@azure/storage-blob';
 import Keyv from 'keyv';
 import { KeyvAdapter } from '@apollo/utils.keyvadapter';
 import * as dotenv from 'dotenv';
+import path from 'path';
 
+import { typeDefs, resolvers } from './gql/gql.js';
+
+const __dirname = path.resolve();
 dotenv.config();
 const app = express();
 
@@ -20,6 +23,10 @@ const apolloServer = new ApolloServer({
 await apolloServer.start();
 apolloServer.applyMiddleware({
    app,
+});
+
+app.get('/', (req, res) => {
+   res.sendFile(path.join(__dirname, '/sandbox.html'));
 });
 
 app.post('/products-update-webhook', async (req, res) => {
