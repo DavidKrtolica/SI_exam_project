@@ -11,6 +11,9 @@ import {
 } from '@azure/storage-blob';
 
 const app = express();
+
+app.use(express.json());
+
 const apolloServer = new ApolloServer({
    typeDefs,
    resolvers
@@ -21,15 +24,10 @@ apolloServer.applyMiddleware({
    app
 });
 
-/**
- * @param  {} '/'
- * @param  {} (req
- * @param  {} res
- */
 app.post('/products-update-webhook', async (req, res) => {
    const header = req.get("Aeg-Event-Type");
    if (header && header === 'SubscriptionValidation') {
-      const event = req.body[0]
+      const event = req.body[0];
       const isValidationEvent = event?.data?.validationCode &&
          event?.eventType == 'Microsoft.EventGrid.SubscriptionValidationEvent'
       if (isValidationEvent) {
@@ -48,19 +46,21 @@ app.post('/products-update-webhook', async (req, res) => {
 
    const containerClient = await blobServiceClient.getContainerClient(containerName);
 
-   downloadBlobToFile(containerClient, 'products.db', './products.txt').then((res) => {
-      console.log('done....', res);
+   downloadBlobToFile(containerClient, 'products.db', './products.db').then((res) => {
+      console.log('File downloaded successfully ', res);
    }).catch((e) => {
-      console.log(e)
+      console.log('Error while downloading file: ', e)
    })
 
    res.status(200).send(req.body);
 })
 
+const port = process.env.PORT || 8080;
+
 app.listen({
-      port: 8080
+      port
    }, () =>
-   console.log(`🚀 Server ready at http://localhost:8080`)
+   console.log(`🚀 Server ready at http://localhost:${port}`)
 );
 
 async function downloadBlobToFile(containerClient, blobName, fileNameWithPath) {
