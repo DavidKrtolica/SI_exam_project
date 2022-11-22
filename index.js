@@ -4,8 +4,15 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, si
 import axios from 'axios';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
-import cors from 'cors';    
+import cors from 'cors';
+import admin from "firebase-admin";
 
+import serviceAccount from "./auth-service-si-firebase-adminsdk-nzwji-d987f2e2f4.json" assert { type: "json" };
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://auth-service-si-default-rtdb.europe-west1.firebasedatabase.app"
+});
 
 //Firebase configuration
 const firebaseConfig = {
@@ -206,6 +213,33 @@ app.get("/auth/acceptInvite", (req, res) => {
             status: "Error",
             description: "Code Not Valid"
         });
+    }
+});
+
+//ENDPOINT FOR VERIFYING ID TOKEN
+//EXAMPLE: "https://firebase.google.com/docs/auth/admin/verify-id-tokens#node.js"
+app.get("/verifyAccessToken", (req, res) => {
+    const authHeader = req.headers.authorization;
+    if (authHeader) {
+        const accessToken = authHeader.split(" ")[1];
+        admin
+            .auth()
+            .verifyIdToken(accessToken)
+            .then(function (decodedToken) {
+                // Further logic performed by your API route here
+                const uid = decodedToken.uid;
+                res.status(200).json({
+                    status: "Success",
+                    uid
+                });
+            })
+            .catch(function (error) {
+                res.status(403).json({
+                    status: "Invalid token",
+                });
+            });
+    } else {
+        res.sendStatus(403);
     }
 });
 
