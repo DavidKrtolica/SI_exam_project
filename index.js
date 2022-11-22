@@ -43,6 +43,10 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 //CLIENT (REACT SIGN-UP FORM POST REQUEST) SEND A REQUEST WITH BODY CONTAINING USER INFO
 app.post("/auth/register", (req, res) => {
     const newUser = req.body;
+    /*if(req.query.code != undefined){
+        //that is the invited user
+        console.log("INVITED USER WITH CODE: "+req.query.code);
+    }*/
     createUserWithEmailAndPassword(firebaseAuth, newUser.email, newUser.password)
         .then((response) => {
             //HERE WE SAVE THE USER TO OUR?/THEIR? DATABASE
@@ -207,7 +211,8 @@ app.get("/auth/acceptInvite", (req, res) => {
     */
     if(inviteCode) {
         //res.redirect(307, "/auth/register");
-        res.redirect(307, "/");
+        //res.redirect(307, "https://integrate-authentication-service.azurewebsites.net/register?code="+inviteCode);
+        res.redirect("/");
     } else {
         res.status(404).json({
             status: "Error",
