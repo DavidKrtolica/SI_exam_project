@@ -11,7 +11,7 @@ module.exports = async function (context, req) {
     });
     //context.log("transporter", transporter);
     //context.log("transporter", transporter.sendMail);
-    let link = "our.awesomeapi.com/register?code=";
+    let link = "https://authentication-service-si.azurewebsites.net/auth/acceptInvite?code=";
     const code = generateCode();
     link += code;
     //context.log(process.env.EMAIL, process.env.PASSWORD);
@@ -64,6 +64,7 @@ module.exports = async function (context, req) {
 }
 
 function generateCode() {
+    //uuid
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let code = '';
     for (let i = 0; i < 20; i += 1) {
