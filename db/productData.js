@@ -5,6 +5,25 @@ export const fetchById = async (id) =>
 
 export const fetchAll = async () => await knex.select('*').from('products');
 
+export const fetch = async ({ searchTerm, category, minPrice, maxPrice }) => {
+   const query = knex.select('*').from('products');
+   if (searchTerm) {
+      query
+         .whereLike('productName', `%${searchTerm}%`)
+         .orWhereLike('productSubTitle', `%${searchTerm}%`);
+   }
+
+   if (category) {
+      query.where('mainCategory', category).orWhere('subCategory', category);
+   }
+
+   if (minPrice && maxPrice) {
+      query.where('price', '>=', minPrice).andWhere('price', '<=', maxPrice);
+   }
+
+   return await query;
+};
+
 export const insertProduct = async (product) => {
    try {
       await knex('products').insert(product);

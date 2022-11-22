@@ -14,6 +14,13 @@ export const typeDefs = gql`
       overallRating: Float
    }
 
+   input SearchFilter {
+      searchTerm: String
+      category: String
+      minPrice: Float
+      maxPrice: Float
+   }
+
    input CreateProductInput {
       productName: String!
       productSubTitle: String
@@ -36,7 +43,7 @@ export const typeDefs = gql`
 
    type Query {
       product(id: ID!): Product!
-      products: [Product]!
+      products(searchFilter: SearchFilter): [Product]!
    }
 
    type Mutation {
@@ -49,7 +56,13 @@ export const typeDefs = gql`
 export const resolvers = {
    Query: {
       product: (_, { id }) => productData.fetchById(id),
-      products: () => productData.fetchAll(),
+      products: async (_, { searchFilter }) => {
+         if (searchFilter) {
+            return await productData.fetch(searchFilter);
+         } else {
+            return await productData.fetchAll();
+         }
+      },
    },
    Mutation: {
       createProduct: (_, { input }) => productData.insertProduct(input),
