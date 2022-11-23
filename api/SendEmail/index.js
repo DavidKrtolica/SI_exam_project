@@ -5,16 +5,13 @@ module.exports = async function (context, req) {
     let transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
-        user: process.env.EMAIL,
-        pass: process.env.PASSWORD,
+            user: process.env.EMAIL,
+            pass: process.env.PASSWORD,
         },
     });
-    //context.log("transporter", transporter);
-    //context.log("transporter", transporter.sendMail);
     let link = "https://authentication-service-si.azurewebsites.net/auth/acceptInvite?code=";
     const code = generateCode();
     link += code;
-    //context.log(process.env.EMAIL, process.env.PASSWORD);
     saveCode(context, req.body.email, code);
     const mailOptions = {
         from: `"${process.env.NAME}" <${process.env.EMAIL}>`, // sender address
@@ -27,10 +24,8 @@ module.exports = async function (context, req) {
         Kind regards,<br>
         ${process.env.NAME}`, // html body
     };
-    //context.log(mailOptions);
     let response;
-    //original code that worked
-    /*let info = await transporter.sendMail(mailOptions, (error, info) => {
+    let info = await transporter.sendMail(mailOptions, (error, info) => {
         context.log("inside", info);
         if (error) {
             response = error;
@@ -41,26 +36,9 @@ module.exports = async function (context, req) {
         }
         context.res = {
             // status: 200, /* Defaults to 200 */
-         /*   body: response
+            body: response
         };
-    });*/
-
-      //test with then/catch
-    transporter.sendMail(mailOptions)
-        .then((info) => {
-            context.log("inside", info);
-            response = "User successfully invited";
-            context.log("response", response);
-        })
-        .catch((error) => {
-            response = error;
-            context.log("error", error);
-        });
-    //context.log("info", info);
-    context.res = {
-        // status: 200, /* Defaults to 200 */
-        body: response
-    };
+    });
 }
 
 function generateCode() {
