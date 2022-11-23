@@ -226,16 +226,14 @@ app.get("/verifyAccessToken", (req, res) => {
             .auth()
             .verifyIdToken(accessToken)
             .then(function (decodedToken) {
-                // Further logic performed by your API route here
                 const uid = decodedToken.uid;
                 res.status(200).json({
-                    status: 200,
                     uid
                 });
             })
             .catch(function (error) {
                 res.status(403).json({
-                    status: 403,
+                    uid: "invalid"
                 });
             });
     } else {
