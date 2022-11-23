@@ -4,6 +4,7 @@ class ProductsSpider(scrapy.Spider):
     name = 'Products'
     allowed_domains = ['www.pricerunner.dk']
     start_urls = ['http://www.pricerunner.dk/']
+    choices = ['Farve', 'Størrelse']
 
     def parse(self, response):
         for category in response.css("li.yE113W5m69"):
@@ -54,6 +55,29 @@ class ProductsSpider(scrapy.Spider):
         img = response.css("img[data-testid=productImage]::attr(src)").get()
         alt = response.css("img[data-testid=productImage]::attr(alt)").get()
         #additional_info: Just a free column. For instance, it could be used to indicate availability among the choices. 
+        #get additional 
+        #product_informantion = response.xpath('//div[has-class("y47Z07Lcqo", "pr-1nzd1qn")]')
+        #product_informantion = response.css('div.y47Z07Lcqo.pr-1nzd1qn').get()
+        #print("product_info", product_informantion)
+        has_additional_info = False
+        additional_info = []
+        for product_information in response.css('div.FC57OyhG0j.ejNEYYt7Mj'):
+            print("XXX",product_information.xpath('span/text()').get())
+            if (not has_additional_info and product_information.xpath('span/text()').get() == "Alle"):
+                has_additional_info = True
+                print("GOT ALLE\n")
+            elif (has_additional_info):
+                additional_info.append(product_information.xpath('span/text()').get())
+            """
+            print("product_info", product_information, "\n")
+            
+            for additional_information in product_information.css('div.ttn_sm0pJI'):
+                print("additional_info", additional_information, "\n")
+                specific_information = additional_information.xpath('div/span/span/text()').get()
+                print ('specific_info',specific_information,"\n")
+                if (specific_information and specific_information in self.choices):
+                    print("inside\n")
+            """
         #ensure most info is present
         if (name and category_name and price and description):
             ###CHECK WITH DB VALUES
@@ -66,7 +90,8 @@ class ProductsSpider(scrapy.Spider):
                 'price': price,
                 'description': description,
                 'img': img,
-                'alt': alt
+                'alt': alt,
+                'additional_info': additional_info
             }
 
         
