@@ -1,4 +1,6 @@
 const nodemailer = require("nodemailer");
+const { v4: uuidv4 } = require('uuid');
+
 module.exports = async function (context, req) {
     context.log('Starting processing email request.');
 
@@ -10,7 +12,7 @@ module.exports = async function (context, req) {
         },
     });
     let link = "https://authentication-service-si.azurewebsites.net/auth/acceptInvite?code=";
-    const code = generateCode();
+    const code = uuidv4();;
     link += code;
     saveCode(context, req.body.email, code);
     const mailOptions = {
@@ -39,16 +41,6 @@ module.exports = async function (context, req) {
             body: response
         };
     });
-}
-
-function generateCode() {
-    //uuid
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let code = '';
-    for (let i = 0; i < 20; i += 1) {
-      code += characters[Math.floor(Math.random() * (characters.length - 1))];
-    }
-    return code;
 }
 
 function saveCode(context, email, code) {
