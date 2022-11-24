@@ -22,12 +22,28 @@ availableCategories.map((category, index) => {
    categoryDropdownArea.appendChild(element);
 });
 
-searchButton.addEventListener('click', (e) => {
+searchButton.addEventListener('click', async (e) => {
    const searchFilter = {
-      searchTerm: searchTerm.value,
-      category: selectedCategory,
-      minPrice: minPrice.value,
-      maxPrice: maxPrice.value,
+      searchTerm: searchTerm.value || undefined,
+      category: selectedCategory || undefined,
+      minPrice: minPrice.value || undefined,
+      maxPrice: maxPrice.value || undefined,
    };
    console.log('Send request with search filter: ', searchFilter);
+
+   const query = `query Products($searchFilter: SearchFilter) {
+      products(searchFilter: $searchFilter) {
+        id
+        productName
+        productSubTitle
+        mainCategory
+        subCategory
+        price
+        link
+        overallRating
+      }
+    }`;
+
+   const data = await gqlRquest(query, { searchFilter });
+   console.log('Query Response: ', data);
 });
