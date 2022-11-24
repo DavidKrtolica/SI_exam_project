@@ -1,82 +1,278 @@
 import express from 'express';
 import http from 'http';
+import mysql from 'mysql';
+import {
+    ServiceBusClient
+} from "@azure/service-bus";
+import {
+    Server
+} from "socket.io";
+import {
+    v4 as uuidv4
+} from 'uuid';
 import cors from 'cors';
-import { getUsersInRoom, removeUser, addUser, markUserAsDisconnected, addUserToDatabase, getUser } from "./users.js";
-import { Server } from "socket.io";
 
 const app = express();
 
 const server = http.createServer(app);
 
-// const firebaseConfig = {
-//   apiKey: "API_KEY",
-//   authDomain: "PROJECT_ID.firebaseapp.com",
-//   databaseURL: "https://PROJECT_ID.firebaseio.com",
-//   projectId: "PROJECT_ID",
-//   storageBucket: "PROJECT_ID.appspot.com",
-//   messagingSenderId: "SENDER_ID",
-//   appId: "APP_ID",
-//   measurementId: "G-MEASUREMENT_ID",
-// };
-
 const io = new Server(server, {
     perMessageDeflate: false,
+    cors: {
+        origin: '*',
+        methods: ['GET', 'POST'],
+    },
 });
-
-// app.use(express.static('public'));
 
 app.use(express.json());
 
-// app.use(cors())
+app.use(cors());
 
+// health checker
 app.get('/', (req, res) => {
-    console.log('req headers = ', req.headers);
     res.status(200).send('OK');
 })
- 
-app.post('/invite', (req, res) => {
-    const userCreated = addUserToDatabase(req.body);
-    console.log('user created = ', userCreated);
-    if (!userCreated) {
-        throw new Error('User already exists!');
-    } else {
-        const user = getUser(req.body.email);
-        res.send({ created: true });
-        io.to(user.room).emit('roomData', {
-            room: user.room,
-            users: getUsersInRoom(user.room)
-        });
-    }
-})
 
-io.on("connection", (socket) => {
-    socket.on('joinRequest', ({ name, room }) => {
-        const socketId = socket.id;
-        const { error, user } = addUser(name, room, socketId);
-        if (error) return socket.emit('error', error);
+// invites to join a wishlist
+app.post('/invite', async (req, res) => {
+    const accessToken = req.header('authorization');
+    const parsedToken = parseJwt(accessToken);
+    const emailTo = req.body.emailTo;
+    const validEmailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+    if (!emailTo.match(validEmailRegex)) return res.status(400).send('Invalid email');
+    const wishlistId = req.body.wishlistId;
+    const code = uuidv4();
 
-        socket.join(user.room);
-
-        io.to(user.room).emit('roomData', {
-            room: user.room,
-            users: getUsersInRoom(user.room)
-        });
-    })
-
-    socket.on('disconnect', () => {
-        const user = removeUser(socket.id);
-        if (user) {
-            markUserAsDisconnected(socket.id);
-            io.to(user.room).emit('roomData', {
-                room: user.room,
-                users: getUsersInRoom(user.room)
+    // adds the user to the wishlist in the database
+    addUserToWishlist(wishlistId, code, emailTo)
+        .then(() => {
+            // sends message to queue for further processing by the email service
+            const serviceBusMessage = {
+                body: {
+                    emailTo,
+                    invitedBy: parsedToken.email,
+                    wishlistId,
+                    code
+                }
+            };
+            // if db operation successful, we send message to queue
+            sendMessageToQueue(serviceBusMessage).catch((err) => {
+                console.log("Error occurred: ", err);
             });
-        }
+            return res.status(200).send('Added user to wishlist');
+        }).catch((e) => {
+            return res.status(400).send(e);
+        })
+})
+
+// creates a new wishlist
+app.post('/wishlist', async (req, res) => {
+    const wishlistName = req.body.wishlistName;
+    const accessToken = req.header('authorization');
+    const parsedToken = parseJwt(accessToken);
+    const userId = parsedToken.user_id;
+    createNewWishlist(wishlistName, userId).then((lastInsertedId) => {
+        console.log('created new wishlist with id = ', lastInsertedId);
+        return res.status(200).send({
+            lastInsertedId
+        });
+    }).catch((e) => {
+        return res.status(400).send(e);
     })
 })
 
-const PORT = process.env.PORT || 3000;
+// adds a product to a wishlist
+app.post('/wishlist/product', async (req, res) => {
+    const wishlistId = req.body.wishlistId;
+    const productId = req.body.productId;
+    addProductToWishlist(wishlistId, productId).then((res) => {
+        return res.status(200).send('Added product to wishlist', productId);
+    }).catch((e) => {
+        return res.status(400).send(e);
+    })
+})
+
+// views a wishlist
+app.get('/wishlist/:id', async (req, res) => {
+    const accessToken = req.header('authorization');
+    const parsedToken = parseJwt(accessToken);
+    const email = parsedToken.email;
+    const wishlistId = req.params.id;
+
+    // validates that there is a wishlist with the given id
+    getWishlistById(wishlistId).then((dbResult) => {
+        if (dbResult < 1) return res.status(400).send('Wishlist does not exist');
+    }).catch((e) => {
+        return res.status(400).send('Wishlist does not exist');
+    })
+
+    // wishlistId is the socket room id
+    // gets the users associated with this wishlist
+    // shows who is online, offline and not accepted invitation
+    io.on("connection", async (socket) => {
+        try {
+            socket.join(wishlistId);
+            const socketId = socket.id;
+            // sets socket_id column in wishlists_have_users table
+            await updateSocketId(socketId, wishlistId, email);
+            const users = await getUsersInWishlist(wishlistId);
+            console.log('users = ', users);
+            io.to(wishlistId).emit('wishlistData', {
+                wishlistId,
+                users,
+            });
+        } catch (e) {
+            return res.status(400).send(e);
+        }
+
+        socket.on('disconnect', async () => {
+            console.log('socket disconnected!');
+            // TODO: implement on disconnect 
+            // await markUserAsDisconnected(socket.id);
+            // io.to(wishlistId).emit('wishlistData', {
+            //     wishlistId,
+            //     users: await getInvitedUsers(wishlistId)
+            // });
+        })
+    })
+})
+
+const PORT = process.env.PORT || 3005;
 
 server.listen(PORT, () => {
     console.log(`server listening on port ${PORT}`);
 })
+
+
+// utils
+const parseJwt = (token) => {
+    return JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+}
+
+
+// inserts message to Azure Service Bus queue
+const connectionString = "Endpoint=sb://service-bus-si-exam.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=Hfngr0rv5FC0gIXw0Jl0PSEn4BDCkR3LGHLi093MuPI="
+const queueName = "invite-friend-with-email"
+const sendMessageToQueue = async (message) => {
+    const sbClient = new ServiceBusClient(connectionString);
+    const sender = sbClient.createSender(queueName);
+    try {
+        await sender.sendMessages(message);
+        await sender.close();
+    } finally {
+        await sbClient.close();
+    }
+}
+
+
+// database methods
+const createNewConnection = () => {
+    return mysql.createConnection({
+        host: "eros.mysql.database.azure.com",
+        user: "api",
+        password: "gcXHY&My-3=8+/6~",
+        database: "wishlist_website",
+        port: 3306,
+        ssl: {
+            rejectUnauthorized: true,
+        }
+    });
+}
+
+const createNewWishlist = async (wishlistName, userId) => {
+    let conn;
+    conn = await createNewConnection();
+    return new Promise(async (resolve, reject) => {
+        conn.connect();
+        // verify that the wishlist exists
+        conn.query(
+            'INSERT INTO wishlists SET ?', {
+                name: wishlistName,
+                user_id: userId,
+                created_at: new Date().toISOString().slice(0, 19).replace('T', ' '),
+            },
+            function (error, results, fields) {
+                if (error) reject(error);
+                resolve(results.insertId);
+            });
+        conn.end();
+    });
+}
+
+const addProductToWishlist = async (wishlistId, productId) => {
+    let conn;
+    conn = await createNewConnection();
+    return new Promise(async (resolve, reject) => {
+        conn.connect();
+        // verify that the wishlist exists
+        conn.query(
+            'INSERT INTO wishlists_have_products VALUES (?, ?)', [wishlistId, productId],
+            function (error, results, fields) {
+                if (error) reject(error);
+                resolve(results);
+            });
+        conn.end();
+    });
+}
+
+const addUserToWishlist = async (wishlistId, code, emailTo) => {
+    let conn;
+    conn = await createNewConnection();
+    return new Promise(async (resolve, reject) => {
+        conn.connect();
+        // verify that the wishlist exists
+        conn.query(
+            'INSERT INTO wishlists_have_users VALUES (?, ?, ?, ?, ?, ?, ?)', [wishlistId, null, null, false, code, emailTo, new Date().toISOString().slice(0, 19).replace('T', ' ')],
+            function (error, results, fields) {
+                if (error) reject(error);
+                resolve(results);
+            });
+        conn.end();
+    });
+}
+
+const getWishlistById = async (wishlistId) => {
+    let conn;
+    conn = await createNewConnection();
+    return new Promise(async (resolve, reject) => {
+        conn.connect();
+        // verify that the wishlist exists
+        conn.query(
+            'SELECT count(*) FROM wishlists where id = ?', [wishlistId],
+            function (error, results, fields) {
+                if (error) reject(error);
+                resolve(parseInt(results[0]["count(*)"]));
+            });
+        conn.end();
+    });
+}
+
+const getUsersInWishlist = async (wishlistId) => {
+    let conn;
+    conn = await createNewConnection();
+    return new Promise(async (resolve, reject) => {
+        conn.connect();
+        conn.query(
+            'SELECT * FROM wishlists_have_users WHERE wishlist_id = ?', [wishlistId],
+            function (error, results, fields) {
+                if (error) reject(error);
+                resolve(parseInt(results[0]["count(*)"]));
+            });
+        conn.end();
+    });
+}
+
+const updateSocketId = async (socketId, wishlistId, email) => {
+    let conn;
+    conn = await createNewConnection();
+    return new Promise(async (resolve, reject) => {
+        conn.connect();
+        conn.query(
+            'UPDATE wishlists_have_users SET user_socket_id = ?, has_accepted_invitation = TRUE WHERE wishlist_id = ? AND email_to = ?', [socketId, wishlistId, email],
+            function (error, results, fields) {
+                if (error) reject(error);
+                resolve(parseInt(results[0]["count(*)"]));
+            });
+        conn.end();
+    });
+}
