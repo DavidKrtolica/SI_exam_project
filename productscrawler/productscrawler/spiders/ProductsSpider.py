@@ -1,4 +1,5 @@
 import scrapy
+import re
 
 class ProductsSpider(scrapy.Spider):
     name = 'Products'
@@ -61,24 +62,25 @@ class ProductsSpider(scrapy.Spider):
         #print("product_info", product_informantion)
         has_additional_info = False
         additional_info = []
-        for product_information in response.css('div.FC57OyhG0j.ejNEYYt7Mj'):
-            print("XXX",product_information.xpath('span/text()').get())
-            if (not has_additional_info and product_information.xpath('span/text()').get() == "Alle"):
-                has_additional_info = True
-                print("GOT ALLE\n")
+        property_index = -1
+        for product_information in response.css('div.FC57OyhG0j.ejNEYYt7Mj').xpath('label'):
+            information_value = product_information.xpath('span/text()').get()
+            if (information_value == "Alle"):
+                if (not has_additional_info):
+                    has_additional_info = True
+                additional_info.append([])
+                property_index += 1
             elif (has_additional_info):
-                additional_info.append(product_information.xpath('span/text()').get())
-            """
-            print("product_info", product_information, "\n")
-            
-            for additional_information in product_information.css('div.ttn_sm0pJI'):
-                print("additional_info", additional_information, "\n")
-                specific_information = additional_information.xpath('div/span/span/text()').get()
-                print ('specific_info',specific_information,"\n")
-                if (specific_information and specific_information in self.choices):
-                    print("inside\n")
-            """
-        #ensure most info is present
+                additional_info[property_index].append(information_value)
+        color = []
+        size = []
+        for type in additional_info:
+            if re.search("^[A-Z][a-z].+$", type[0]):
+                color = type
+            else:
+                size = type
+        #size - digits or capital letters mixed with digits
+        #color - capital letter followd by lowercase
         if (name and category_name and price and description):
             ###CHECK WITH DB VALUES
             yield {
@@ -91,7 +93,8 @@ class ProductsSpider(scrapy.Spider):
                 'description': description,
                 'img': img,
                 'alt': alt,
-                'additional_info': additional_info
+                'colors': color,
+                'size': size
             }
 
         
