@@ -15,6 +15,8 @@ const io = new Server(server, {
     cors: {
         origin: '*',
         methods: ['GET', 'POST'],
+        allowedHeaders: ["Ocp-Apim-Subscription-Key", "Authorization"],
+        credentials: true
     },
 });
 
