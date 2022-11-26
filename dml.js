@@ -1,5 +1,6 @@
-import { knexInstance as knex } from './db.js';
-import {createTables} from './ddl.js';
+import { knexInstance as knex } from './api/CreateAndSendProductsDB/db.js';
+import {createTables} from './api/CreateAndSendProductsDB/ddl.js';
+import {send} from './ftp.js';
 import * as fs from 'fs';
 
 //Use this to create a products table with one entry in case products.db is missing
@@ -9,9 +10,9 @@ let sizeId, colorId;
 let insertedSize = {}
 let insertedColor = {}
 
-function insertColorSize() {
+async function insertColorSize() {
     //insert color and size at the beginning
-    knex.insert({
+    await knex.insert({
         propertyName: 'color',
     })
     .returning('id')
@@ -20,7 +21,7 @@ function insertColorSize() {
         colorId = id
         //console.log('0. color inserted')
     });
-    return knex.insert({
+    await knex.insert({
         propertyName: 'size',
     })
     .returning('id')
@@ -117,8 +118,8 @@ async function insertColor(product){
                 productId: currentProductId,
                 propertyId: insertedColor[color]
             })
-            .into('productHasProperties')
-            .then(() => console.log('4.1 many to many color inserted', insertedColor, currentProductId, insertedColor[color]))
+            .into('productHasProperties').then()
+            //.then(() => console.log('4.1 many to many color inserted', insertedColor, currentProductId, insertedColor[color]))
         }
     }
     await insertSize(product)
@@ -175,4 +176,19 @@ async function insertData(data) {
         //console.log('6. done')
     }
     //console.log('7. done insert')
+    await knex.destroy()
+    await send("products.db")
 } 
+
+insertData([
+    {"name": "TP-Link Tapo C320WS", "category_name": "Hjem & husholdning", "subcategory_name": "Smart home", "rating": "4,3", "link": "https://www.pricerunner.dk:443/pl/589-3200822964/Overvaagningskameraer/TP-Link-Tapo-C320WS-Sammenlign-Priser", "price": "399\u00a0kr.", "description": "2560x1440 (QHD/2K), Punkt, Mobilt netv\u00e6rk, Ethernet, WiFi, Bev\u00e6gelsesdetektor, Tilh\u00f8rende mobilapp, Google Home, Amazon Alexa", "img": "https://www.pricerunner.dk/product/40x40/3003571638/TP-Link-Tapo-C320WS.jpg?ph=true", "alt": "TP-Link Tapo C320WS", "color": [], "size": []},
+    {"name": "Philips Hue Tap Dial Switch EU", "category_name": "Hjem & husholdning", "subcategory_name": "Smart home", "rating": null, "link": "https://www.pricerunner.dk:443/pl/1577-3201754923/Intelligente-hjem/Philips-Hue-Tap-Dial-Switch-EU-Sammenlign-Priser", "price": "290\u00a0kr.", "description": "Bluetooth, Zigbee, Batteri", "img": "https://www.pricerunner.dk/product/40x40/3005163716/Philips-Hue-Tap-Dial-Switch-EU.jpg?ph=true", "alt": "Philips Hue Tap Dial Switch EU", "color": ["Hvid", "Sort"], "size": []},
+    {"name": "Philips Hue 1x Smart Plug EU", "category_name": "Hjem & husholdning", "subcategory_name": "Smart home", "rating": "4,5", "link": "https://www.pricerunner.dk:443/pl/1577-5043155/Intelligente-hjem/Philips-Hue-1x-Smart-Plug-EU-Sammenlign-Priser", "price": "159\u00a0kr.", "description": "Bluetooth, Zigbee, Elnet", "img": "https://www.pricerunner.dk/product/40x40/1906942726/Philips-Hue-1x-Smart-Plug-EU.jpg?ph=true", "alt": "Philips Hue 1x Smart Plug EU", "color": [], "size": []},
+    {"name": "HyperX SoloCast", "category_name": "Lyd & billede", "subcategory_name": "Studie- & optageudstyr", "rating": "4,6", "link": "https://www.pricerunner.dk:443/pl/176-3200013800/Mikrofoner/HyperX-SoloCast-Sammenlign-Priser", "price": "418\u00a0kr.", "description": "Mikrofon", "img": "https://www.pricerunner.dk/product/40x40/3006622654/HyperX-SoloCast.jpg?ph=true", "alt": "HyperX SoloCast", "color": ["Hvid", "Sort"], "size": []},
+    {"name": "Blue Microphones Yeti X", "category_name": "Lyd & billede", "subcategory_name": "Studie- & optageudstyr", "rating": "4,6", "link": "https://www.pricerunner.dk:443/pl/176-5059024/Mikrofoner/Blue-Microphones-Yeti-X-Sammenlign-Priser", "price": "889\u00a0kr.", "description": "Mikrofon", "img": "https://www.pricerunner.dk/product/40x40/3006623144/Blue-Microphones-Yeti-X.jpg?ph=true", "alt": "Blue Microphones Yeti X", "color": [], "size": []},
+    {"name": "Nordic OnAir", "category_name": "Lyd & billede", "subcategory_name": "Studie- & optageudstyr", "rating": "4,0", "link": "https://www.pricerunner.dk:443/pl/176-3200253039/Mikrofoner/Nordic-OnAir-Sammenlign-Priser", "price": "279\u00a0kr.", "description": "Mikrofon", "img": "https://www.pricerunner.dk/product/40x40/3002345508/Nordic-OnAir.jpg?ph=true", "alt": "Nordic OnAir", "color": [], "size": []},
+    {"name": "Shure MV7", "category_name": "Lyd & billede", "subcategory_name": "Studie- & optageudstyr", "rating": "5,0", "link": "https://www.pricerunner.dk:443/pl/176-3200005728/Mikrofoner/Shure-MV7-Sammenlign-Priser", "price": "1.640\u00a0kr.", "description": "Mikrofon", "img": "https://www.pricerunner.dk/product/40x40/3000686623/Shure-MV7.jpg?ph=true", "alt": "Shure MV7", "color": ["Sort", "S\u00f8lv"], "size": []},
+    {"name": "R\u00d8DE PSA1", "category_name": "Lyd & billede", "subcategory_name": "Studie- & optageudstyr", "rating": "4,9", "link": "https://www.pricerunner.dk:443/pl/176-5124576/Mikrofoner/ROEDE-PSA1-Sammenlign-Priser", "price": "549\u00a0kr.", "description": "Mikrofonstativ", "img": "https://www.pricerunner.dk/product/40x40/3000118253/ROEDE-PSA1.jpg?ph=true", "alt": "R\u00d8DE PSA1", "color": [], "size": []},
+    {"name": "Blue Microphones Yeti", "category_name": "Lyd & billede", "subcategory_name": "Studie- & optageudstyr", "rating": "4,6", "link": "https://www.pricerunner.dk:443/pl/176-3749365/Mikrofoner/Blue-Microphones-Yeti-Sammenlign-Priser", "price": "639\u00a0kr.", "description": "Mikrofon", "img": "https://www.pricerunner.dk/product/40x40/1871027541/Blue-Microphones-Yeti.jpg?ph=true", "alt": "Blue Microphones Yeti", "color": ["Bl\u00e5", "Gr\u00e5", "Hvid", "R\u00f8d", "Sort", "S\u00f8lv"], "size": []},
+    {"name": "HyperX QuadCast", "category_name": "Lyd & billede", "subcategory_name": "Studie- & optageudstyr", "rating": "4,6", "link": "https://www.pricerunner.dk:443/pl/176-4884710/Mikrofoner/HyperX-QuadCast-Sammenlign-Priser", "price": "599\u00a0kr.", "description": "Mikrofon", "img": "https://www.pricerunner.dk/product/40x40/1871531364/HyperX-QuadCast.jpg?ph=true", "alt": "HyperX QuadCast", "color": [], "size": []},
+])

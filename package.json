@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/DavidKrtolica/SI_exam_project#readme",
   "dependencies": {
+    "basic-ftp": "^5.0.2",
     "knex": "^2.3.0",
     "sqlite3": "^5.1.2"
   }
