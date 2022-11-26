@@ -234,7 +234,7 @@ const getWishlistIdsByUserEmail = async (userEmail) => {
 
 const setHasAcceptedInviteByWishlistId = async (wishlistId, userEmail) => {
     return new Promise(async (resolve, reject) => {
-        conn.query(
+        MySQLConnection.query(
             'UPDATE wishlists_have_users SET has_accepted_invitation = TRUE WHERE wishlist_id = ? AND user_email = ?', [wishlistId, userEmail],
             function (error, results, fields) {
                 if (error) {
