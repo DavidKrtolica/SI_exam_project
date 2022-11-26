@@ -5,6 +5,8 @@ import { ServiceBusClient } from "@azure/service-bus";
 import { Server } from "socket.io";
 import { v4 as uuidv4 } from 'uuid';
 import cors from 'cors';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 const app = express();
 
@@ -100,7 +102,7 @@ io.on("connection", async (socket) => {
             const code = uuidv4();
             // adds owner of wishlist to wishlists_have_users table
             await addUserToWishlist(lastInsertedId, code, userEmail, true);
-            socket.emit('createWishlistSucceeded');
+            socket.emit('createWishlistSucceeded', lastInsertedId);
         } catch (error) {
             socket.emit('createWishlistFailed', error);
         }
@@ -141,8 +143,8 @@ const parseJwt = (token) => {
 
 
 // inserts message to Azure Service Bus queue
-const connectionString = "Endpoint=sb://service-bus-si-exam.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=Hfngr0rv5FC0gIXw0Jl0PSEn4BDCkR3LGHLi093MuPI="
-const queueName = "invite-friend-with-email"
+const connectionString = process.env.QUEUE_CONN_STRING;
+const queueName = process.env.QUEUE_NAME;
 const sendMessageToQueue = async (message) => {
     const sbClient = new ServiceBusClient(connectionString);
     const sender = sbClient.createSender(queueName);
@@ -154,14 +156,14 @@ const sendMessageToQueue = async (message) => {
     }
 }
 
-
+console.log('process env host = ', process.env.DB_HOST);
 // database methods
 const MySQLConnection = mysql.createConnection({
-    host: "eros.mysql.database.azure.com",
-    user: "api",
-    password: "gcXHY&My-3=8+/6~",
-    database: "wishlist_website",
-    port: 3306,
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT,
     ssl: {
         rejectUnauthorized: true,
     }
