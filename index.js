@@ -39,9 +39,8 @@ io.on("connection", async (socket) => {
         const parsedToken = parseJwt(accessToken);
         userId = parsedToken.user_id;
         userEmail = parsedToken.email;
-    } catch (e) {
-        console.log('Error = ', e);
-        socket.emit('authFailed');
+    } catch (error) {
+        socket.emit('authFailed', error);
     }
 
     // gets the wishlist ids that the user created/is invited
