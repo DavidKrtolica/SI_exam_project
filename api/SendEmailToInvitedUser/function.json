@@ -1,0 +1,11 @@
+{
+  "bindings": [
+    {
+      "name": "mySbMsg",
+      "type": "serviceBusTrigger",
+      "direction": "in",
+      "queueName": "invite-friend-with-email",
+      "connection": "servicebussiexam_SERVICEBUS"
+    }
+  ]
+}

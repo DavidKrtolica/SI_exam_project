@@ -1,8 +1,11 @@
 const nodemailer = require("nodemailer");
-const { v4: uuidv4 } = require('uuid');
 
-module.exports = async function (context, req) {
-    context.log('Starting processing email request.');
+module.exports = async function(context, mySbMsg) {
+    context.log('Node.js ServiceBus queue trigger function processed message', myQueueItem);
+    context.log('EnqueuedTimeUtc =', context.bindingData.enqueuedTimeUtc);
+    context.log('DeliveryCount =', context.bindingData.deliveryCount);
+    context.log('MessageId =', context.bindingData.messageId);
+    context.log('Starting processing email request.', mySbMsg);
 
     let transporter = nodemailer.createTransport({
         service: "gmail",
@@ -11,16 +14,13 @@ module.exports = async function (context, req) {
             pass: process.env.PASSWORD,
         },
     });
-    let link = "https://authentication-service-si.azurewebsites.net/auth/acceptInvite?code=";
-    const code = uuidv4();;
-    link += code;
-    saveCode(context, req.body.email, code);
+    let link = `https://authentication-service-si.azurewebsites.net/auth/acceptInvite?code=${mySbMsg.code}`;
     const mailOptions = {
         from: `"${process.env.NAME}" <${process.env.EMAIL}>`, // sender address
-        to: req.body.email, // list of receivers
+        to: mySbMsg.emailTo, // list of receivers
         subject: "You have been invited to join your friend's wishlist", // Subject line
-        html: `<b>Hello ${req.body.email}</b><br><br>
-        You have been invited by <b>${req.body.invitedBy}<b> to join their <b>${req.body.invitedTo}<b> wishlist.<br>
+        html: `<b>Hello ${mySbMsg.emailTo}</b><br><br>
+        You have been invited by <b>${mySbMsg.invitedBy}<b> to join their <b>${mySbMsg.wishlistName}<b> wishlist.<br>
         If you wish to join, please click on the link below or copy it to your browser search bar and register:<br>
         <a href="${link}">${link}</a><br>
         Kind regards,<br>
@@ -41,9 +41,4 @@ module.exports = async function (context, req) {
             body: response
         };
     });
-}
-
-function saveCode(context, email, code) {
-    context.log("Connecting to database and saving the code");
-}
-
+};
