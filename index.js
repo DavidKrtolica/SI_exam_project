@@ -169,7 +169,6 @@ const MySQLConnection = mysql.createConnection({
 
 const createNewWishlist = async (wishlistName, userId) => {
     return new Promise(async (resolve, reject) => {
-        // verify that the wishlist exists
         MySQLConnection.query(
             'INSERT INTO wishlists SET ?', {
             name: wishlistName,
@@ -188,7 +187,6 @@ const createNewWishlist = async (wishlistName, userId) => {
 
 const addProductToWishlist = async (wishlistId, productId) => {
     return new Promise(async (resolve, reject) => {
-        // verify that the wishlist exists
         MySQLConnection.query(
             'INSERT INTO wishlists_have_products VALUES (?, ?)', [wishlistId, productId],
             function (error, results, fields) {
@@ -207,7 +205,6 @@ const addUserToWishlist = async (wishlistId, code, userEmail, has_accepted_invit
         MySQLConnection.query(
             'INSERT INTO wishlists_have_users VALUES (?, ?, ?, ?, ?)', [wishlistId, has_accepted_invitation, code, userEmail, new Date().toISOString().slice(0, 19).replace('T', ' ')],
             function (error, results, fields) {
-                console.log('this errror ==== ', error);
                 if (error) {
                     console.log(error);
                     reject(error);
@@ -222,7 +219,6 @@ const getWishlistIdsByUserEmail = async (userEmail) => {
         MySQLConnection.query(
             'SELECT wishlist_id FROM wishlists_have_users WHERE user_email = ?', [userEmail],
             function (error, results, fields) {
-                console.log('error ======= ', error);
                 if (error) {
                     console.log(error);
                     reject(error);
