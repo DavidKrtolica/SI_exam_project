@@ -201,7 +201,6 @@ const addProductToWishlist = async (wishlistId, productId) => {
 
 const addUserToWishlist = async (wishlistId, code, userEmail, has_accepted_invitation) => {
     return new Promise(async (resolve, reject) => {
-        // verify that the wishlist exists
         MySQLConnection.query(
             'INSERT INTO wishlists_have_users VALUES (?, ?, ?, ?, ?)', [wishlistId, has_accepted_invitation, code, userEmail, new Date().toISOString().slice(0, 19).replace('T', ' ')],
             function (error, results, fields) {
