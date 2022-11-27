@@ -1,12 +1,12 @@
 const nodemailer = require("nodemailer");
 
 module.exports = async function(context, mySbMsg) {
-    context.log('Node.js ServiceBus queue trigger function processed message', myQueueItem);
+    context.log('JavaScript ServiceBus queue trigger function processed message', mySbMsg);
+    ontext.log('Node.js ServiceBus queue trigger function processed message', myQueueItem);
     context.log('EnqueuedTimeUtc =', context.bindingData.enqueuedTimeUtc);
     context.log('DeliveryCount =', context.bindingData.deliveryCount);
     context.log('MessageId =', context.bindingData.messageId);
-    context.log('Starting processing email request.', mySbMsg);
-
+    
     let transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
@@ -41,4 +41,5 @@ module.exports = async function(context, mySbMsg) {
             body: response
         };
     });
+
 };

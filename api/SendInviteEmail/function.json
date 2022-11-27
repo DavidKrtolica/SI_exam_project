@@ -4,7 +4,7 @@
       "name": "mySbMsg",
       "type": "serviceBusTrigger",
       "direction": "in",
-      "queueName": "invite-friend-with-email",
+      "queueName": "send-email-queue",
       "connection": "servicebussiexam_SERVICEBUS"
     }
   ]
