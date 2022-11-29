@@ -35,7 +35,8 @@ app.get('/', (req, res) => {
 
 io.on("connection", async (socket) => {
 
-    let userEmail, userId, wishlistIds;
+    let userEmail, userId, wishlistIds, onlineUsers;
+
     try {
         const accessToken = socket.handshake.headers['authorization'];
         const parsedToken = parseJwt(accessToken);
@@ -48,8 +49,15 @@ io.on("connection", async (socket) => {
     // gets the wishlist ids that the user created/is invited
     wishlistIds = await getWishlistIdsByUserEmail(userEmail);
     if (wishlistIds?.length > 0) {
-        wishlistIds.forEach(wishlist => socket.join(wishlist.wishlist_id));
-        wishlistIds.forEach(wishlist => socket.to(wishlist.wishlist_id).emit('userJoined', userEmail));
+        wishlistIds.forEach(async (wishlist) => {
+            socket.userEmail = userEmail;
+            socket.join(wishlist.wishlist_id);
+            const sockets = await io.in(wishlist.wishlist_id).fetchSockets();
+            onlineUsers = sockets.map(socket => socket?.userEmail);
+            const onlineUsersUniqueValues = [...new Set(onlineUsers)];
+            socket.emit('onlineUsers', { onlineUsersUniqueValues });
+            socket.to(wishlist.wishlist_id).emit('onlineUsers', { onlineUsersUniqueValues });
+        });
     }
 
     socket.on('invite', async ({ wishlistId, wishlistName, emailTo }) => {
@@ -123,9 +131,13 @@ io.on("connection", async (socket) => {
     })
 
     socket.on('disconnect', async () => {
-        if (wishlistIds?.length > 0) {
-            wishlistIds.forEach(wishlist => socket.to(wishlist.wishlist_id).emit('userLeft', userEmail));
-        }
+        wishlistIds.forEach(async (wishlist) => {
+            const sockets = await io.in(wishlist.wishlist_id).fetchSockets();
+            onlineUsers = sockets.map(socket => socket?.userEmail);
+            const onlineUsersUniqueValues = [...new Set(onlineUsers)];
+            socket.emit('onlineUsers', { onlineUsersUniqueValues });
+            socket.to(wishlist.wishlist_id).emit('onlineUsers', { onlineUsersUniqueValues });
+        });
     })
 })
 
@@ -156,7 +168,6 @@ const sendMessageToQueue = async (message) => {
     }
 }
 
-console.log('process env host = ', process.env.DB_HOST);
 // database methods
 const MySQLConnection = mysql.createConnection({
     host: process.env.DB_HOST,
@@ -201,10 +212,10 @@ const addProductToWishlist = async (wishlistId, productId) => {
     });
 }
 
-const addUserToWishlist = async (wishlistId, code, userEmail, has_accepted_invitation) => {
+const addUserToWishlist = async (wishlistId, code, userEmail) => {
     return new Promise(async (resolve, reject) => {
         MySQLConnection.query(
-            'INSERT INTO wishlists_have_users VALUES (?, ?, ?, ?, ?)', [wishlistId, has_accepted_invitation, code, userEmail, new Date().toISOString().slice(0, 19).replace('T', ' ')],
+            'INSERT INTO wishlists_have_users VALUES (?, ?, ?, ?)', [wishlistId, code, userEmail, new Date().toISOString().slice(0, 19).replace('T', ' ')],
             function (error, results, fields) {
                 if (error) {
                     console.log(error);
@@ -229,16 +240,16 @@ const getWishlistIdsByUserEmail = async (userEmail) => {
     });
 }
 
-const setHasAcceptedInviteByWishlistId = async (wishlistId, userEmail) => {
-    return new Promise(async (resolve, reject) => {
-        MySQLConnection.query(
-            'UPDATE wishlists_have_users SET has_accepted_invitation = TRUE WHERE wishlist_id = ? AND user_email = ?', [wishlistId, userEmail],
-            function (error, results, fields) {
-                if (error) {
-                    console.log(error);
-                    reject(error);
-                }
-                resolve(true);
-            });
-    });
-}
+// const setHasAcceptedInviteByWishlistId = async (wishlistId, userEmail) => {
+//     return new Promise(async (resolve, reject) => {
+//         MySQLConnection.query(
+//             'UPDATE wishlists_have_users SET has_accepted_invitation = TRUE WHERE wishlist_id = ? AND user_email = ?', [wishlistId, userEmail],
+//             function (error, results, fields) {
+//                 if (error) {
+//                     console.log(error);
+//                     reject(error);
+//                 }
+//                 resolve(true);
+//             });
+//     });
+// }
