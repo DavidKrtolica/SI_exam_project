@@ -7,6 +7,8 @@ authors = ["Marianna <mana998@azet.sk>"]
 [tool.poetry.dependencies]
 python = "^3.10"
 Scrapy = "^2.7.1"
+azure-storage-blob = "^12.14.1"
+azure-identity = "^1.12.0"
 
 [tool.poetry.dev-dependencies]
 
