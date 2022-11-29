@@ -95,15 +95,6 @@ io.on("connection", async (socket) => {
         }
     })
 
-    socket.on('acceptInvite', async ({ wishlistId }) => {
-        try {
-            await setHasAcceptedInviteByWishlistId(wishlistId, userEmail);
-            socket.emit('acceptInviteSucceeded');
-        } catch (error) {
-            socket.emit('acceptInviteFailed');
-        }
-    })
-
     socket.on('createWishlist', async ({ wishlistName }) => {
         try {
             const lastInsertedId = await createNewWishlist(wishlistName, userId);
@@ -239,17 +230,3 @@ const getWishlistIdsByUserEmail = async (userEmail) => {
             });
     });
 }
-
-// const setHasAcceptedInviteByWishlistId = async (wishlistId, userEmail) => {
-//     return new Promise(async (resolve, reject) => {
-//         MySQLConnection.query(
-//             'UPDATE wishlists_have_users SET has_accepted_invitation = TRUE WHERE wishlist_id = ? AND user_email = ?', [wishlistId, userEmail],
-//             function (error, results, fields) {
-//                 if (error) {
-//                     console.log(error);
-//                     reject(error);
-//                 }
-//                 resolve(true);
-//             });
-//     });
-// }
