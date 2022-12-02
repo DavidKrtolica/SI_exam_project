@@ -5,7 +5,7 @@
       "type": "serviceBusTrigger",
       "direction": "in",
       "queueName": "send-email-queue",
-      "connection": "servicebussiexam_SERVICEBUS"
+      "connection": "service-bus-si-exam_RootManageSharedAccessKey_SERVICEBUS"
     }
   ]
 }

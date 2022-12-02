@@ -1,8 +1,8 @@
 //import { knexInstance as knex } from './db.js';
-const knex = require('./db').knexInstance
+//const knex = require('./db').knexInstance
 //Use this to create a products table with one entry in case products.db is missing
 
-module.exports = async function createTables(context) {
+module.exports = async function createTables(context, knex) {
     //console.log("here")
     context.log('Creating tables.');
     if (! (await knex.schema.hasTable('categories')) ) {

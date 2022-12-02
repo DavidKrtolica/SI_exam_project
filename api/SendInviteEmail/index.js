@@ -14,7 +14,7 @@ module.exports = async function(context, mySbMsg) {
             pass: process.env.PASSWORD,
         },
     });
-    let link = `https://authentication-service-si.azurewebsites.net/auth/acceptInvite?code=${mySbMsg.code}`;
+    let link = `https://authentication-service-si.azurewebsites.net/auth/acceptInvite?code=${mySbMsg.code}&email=${mySbMsg.emailTo}`;
     const mailOptions = {
         from: `"${process.env.NAME}" <${process.env.EMAIL}>`, // sender address
         to: mySbMsg.emailTo, // list of receivers
