@@ -5,7 +5,7 @@ info:
     This is Yggrasil's authentication server based on the OpenAPI 3.0 specification.
   termsOfService: http://swagger.io/terms/
   contact:
-    email: email@stud.kea.dk
+    email: davi161a@stud.kea.dk
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
@@ -16,7 +16,12 @@ paths:
   /auth/register:
     post:
       summary: Create/Register a new user 
-      description: User Registration 
+      description: User Registration - if CODE query param is passed, it will include the acceptInvite functionality which updates the DB table where all invited Users and invite codes are stored - if email is correct and code is valid. 
+      parameters:
+        - in: query
+          name: code
+          type: string
+          required: false
       requestBody:
         description: Define User credentials - email & password
         content:
@@ -47,7 +52,12 @@ paths:
   /auth/login:
     post:
       summary: Login using User Credentials
-      description: Login using email & password Authentication
+      description: Login using email & password Authentication - if CODE query param is passed, it will include the acceptInvite functionality which updates the DB table where all invited Users and invite codes are stored - if email is correct and code is valid.
+      parameters:
+        - in: query
+          name: code
+          type: string
+          required: false
       requestBody:
         description: Use existing User credentials - email & password
         content:
@@ -104,7 +114,7 @@ paths:
   /auth/acceptInvite:
     get:
       summary: Accept an invite endpoint, with a code parameter.
-      description: Endpoint for a non-existing User to accept an email-invite and register himself.
+      description: Endpoint for a non-existing / existing User to accept an email-invite and redirect to client signup / register page - code query param lives in the client, and client resends it as a query parameter when sending a request to /auth/login or /auth/register.
       parameters:
         - in: query
           name: code
@@ -124,22 +134,10 @@ components:
     User:
       type: object
       properties:
-        username:
-          type: string
-          example: theUser
-        firstName:
-          type: string
-          example: John
-        lastName:
-          type: string
-          example: James
         email:
           type: string
           example: john@email.com
         password:
-          type: string
-          example: '12345'
-        phone:
           type: string
           example: '12345'
       xml:
