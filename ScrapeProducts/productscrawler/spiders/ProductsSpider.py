@@ -3,7 +3,7 @@ import re
 
 class ProductsSpider(scrapy.Spider):
     name = 'Products'
-    allowed_domains = ['www.pricerunner.dk']
+    allowed_domains = ['pricerunner.dk']
     start_urls = ['http://www.pricerunner.dk/']
     choices = ['Farve', 'Størrelse']
 
@@ -11,6 +11,7 @@ class ProductsSpider(scrapy.Spider):
         for category in response.css("li.yE113W5m69"):
             category_name = category.xpath('a/p/text()').get()
             link = category.css('a::attr(href)').get()
+            print("FOUND category", category_name, "link", link)
             if link is not None and category_name != 'Black Friday':
                 next_page = response.urljoin(link)
                 #follow link from main page to category lists
@@ -23,6 +24,7 @@ class ProductsSpider(scrapy.Spider):
             #open each category to display list of subcategories
             link = subcategory.xpath('div/a/@href').get()
             subcategory_name = subcategory.css('div.pr-13b1e5n').xpath('div/@title').get()
+            print("FOUND subcategory", subcategory_name, "link", link)
             if link is not None:
                 next_page = response.urljoin(link)
                 #follow link from category page to subcategory page lists
@@ -35,7 +37,8 @@ class ProductsSpider(scrapy.Spider):
         for item in response.css("div.al5wsmjlcK"):
             #open each item to display information
             link = item.xpath('a/@href').get()
-            if link is not None:
+            print("FOUND item", item, "link", link)
+            if link is not None and "gotostore" not in link:
                 next_page = response.urljoin(link)
                 #follow link from category page to subcategory page lists
                 request = scrapy.Request(next_page,callback=self.parseInItem)
