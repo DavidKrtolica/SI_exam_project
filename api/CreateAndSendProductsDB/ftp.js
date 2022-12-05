@@ -1,7 +1,7 @@
 //import * as ftp from "basic-ftp"
 const ftp = require('basic-ftp')
 
-module.exports = async function send(path, fileName) {
+module.exports = async function send(path, fileName, context) {
     const client = new ftp.Client();
     client.ftp.verbose = true;
     try {
@@ -11,11 +11,11 @@ module.exports = async function send(path, fileName) {
             password: process.env.FTP_PASSWORD,
             secure: process.env.FTP_SECURE
         });
-        console.log(await client.list());
-        await client.uploadFrom(`${path}${fileName}`, `./files/${fileName}`);
+        //context.log(await client.list());
+        await client.uploadFrom(`${path}${fileName}`, fileName);
     }
     catch(err) {
-        console.log(err);
+        context.log(err);
     }
     client.close();
 }

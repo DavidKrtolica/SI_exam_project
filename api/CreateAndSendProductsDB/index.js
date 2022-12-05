@@ -9,35 +9,21 @@ const util = require('util');
 const send = require('./ftp')
 
 //current inserted value into referenced table
-let currentCategory, currentCategoryId, currentSubcategory, currentSubcategoryId, currentProductId;
+let currentProductId;
 let sizeId, colorId;
+let insertedCategory = {};
+let insertedSubcategory = {};
 let insertedSize = {};
 let insertedColor = {};
 const productsFile = "products.db";
 const path = "C:/home/";
 
 module.exports = async function (context, req) {
-    context.log('JavaScript HTTP trigger function processed a request.');
+    //context.log("JavaScript blob trigger function processed blob \n Blob:", context.bindingData.blobTrigger, "\n Blob Size:", myBlob.length, "Bytes");
     const knex = getKnexInstance();
     if (fs.existsSync(`${path}${productsFile}`)) {
         fs.unlinkSync(`${path}${productsFile}`);
         context.log("Deleted file");
-        /*try {
-            fs.unlinkSync(`${path}${productsFile}`);
-            context.log('Opening file.');
-            const fd = await openAsync(`${path}${productsFile}`, 'r');
-            context.log('Opened file.');
-            fs.close(fd);
-            context.log('Closed file and creating tables');
-            //await createTables();
-            context.log('Created tables.');
-        } catch (err) {
-            context.log.error('ERROR', err);
-            // This rethrown exception will be handled by the Functions Runtime and will only fail the individual invocation
-            throw err;
-        }
-        context.log('file created')
-        //await createTables();*/
     }
     context.log('Create tables.');
     await createTables(context, knex);
@@ -51,11 +37,8 @@ module.exports = async function (context, req) {
         await insertCategory(product, knex);
     }
     await knex.destroy();
-    await send(path, productsFile);
-    context.res = {
-        // status: 200, /* Defaults to 200 */
-        body: "done"
-    };
+    //await send(path, productsFile, context);
+    
 }
 
 async function insertColorSize(context, knex) {
@@ -83,31 +66,29 @@ async function insertColorSize(context, knex) {
 }
 
 async function insertCategory(product, knex) {
-    if (currentCategory !== product.category_name) {
-        currentCategory = product.category_name;
+    if (!(product.category_name in insertedCategory)){
         await knex.insert({
             categoryName: product.category_name,
         })
         .returning('id')
         .into('categories')
         .then(function (id) {
-            currentCategoryId = id;
+            insertedCategory[product.category_name] = id;
         });
     }
     await insertSubcategory(product, knex);
 }
 
 async function insertSubcategory(product, knex){
-    if (currentSubcategory !== product.subcategory_name) {
-        currentSubcategory = product.subcategory_name;
+    if (!(product.subcategory_name in insertedSubcategory)){
         await knex.insert({
-            subcategoryName: currentSubcategory,
-            categoryId: currentCategoryId
+            subcategoryName: product.subcategory_name,
+            categoryId: insertedCategory[product.category_name]
         })
         .returning('id')
         .into('subcategories')
         .then(function (id) {
-            currentSubcategoryId = id;
+            insertedSubcategory[product.subcategory_name] = id;
         });
     }
     await insertProduct(product, knex);
@@ -122,7 +103,7 @@ async function insertProduct(product, knex){
             overallRating: product.rating,
             image: product.img,
             alt: product.alt,
-            categoryId: currentSubcategoryId
+            categoryId: insertedSubcategory[product.subcategory_name]
     })
     .returning('id')
     .into('products')
