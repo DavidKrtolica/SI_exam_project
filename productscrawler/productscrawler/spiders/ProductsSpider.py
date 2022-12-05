@@ -78,7 +78,7 @@ class ProductsSpider(scrapy.Spider):
         color = []
         size = []
         for type in additional_info:
-            if re.search("^[A-Z][a-z].+$", type[0]):
+            if re.search("^[A-Z][a-zæøå].+$", type[0]):
                 color = type
             else:
                 size = type
@@ -96,7 +96,7 @@ class ProductsSpider(scrapy.Spider):
                 'description': description,
                 'img': img,
                 'alt': alt,
-                'colors': color,
+                'color': color,
                 'size': size
             }
 

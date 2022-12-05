@@ -11,7 +11,7 @@ class ProductsSpider(scrapy.Spider):
         for category in response.css("li.yE113W5m69"):
             category_name = category.xpath('a/p/text()').get()
             link = category.css('a::attr(href)').get()
-            print("FOUND category", category_name, "link", link)
+            #print("FOUND category", category_name, "link", link)
             if link is not None and category_name != 'Black Friday':
                 next_page = response.urljoin(link)
                 #follow link from main page to category lists
@@ -24,7 +24,7 @@ class ProductsSpider(scrapy.Spider):
             #open each category to display list of subcategories
             link = subcategory.xpath('div/a/@href').get()
             subcategory_name = subcategory.css('div.pr-13b1e5n').xpath('div/@title').get()
-            print("FOUND subcategory", subcategory_name, "link", link)
+            #print("FOUND subcategory", subcategory_name, "link", link)
             if link is not None:
                 next_page = response.urljoin(link)
                 #follow link from category page to subcategory page lists
@@ -37,7 +37,7 @@ class ProductsSpider(scrapy.Spider):
         for item in response.css("div.al5wsmjlcK"):
             #open each item to display information
             link = item.xpath('a/@href').get()
-            print("FOUND item", item, "link", link)
+            #print("FOUND item", item, "link", link)
             if link is not None and "gotostore" not in link:
                 next_page = response.urljoin(link)
                 #follow link from category page to subcategory page lists
@@ -78,7 +78,7 @@ class ProductsSpider(scrapy.Spider):
         color = []
         size = []
         for type in additional_info:
-            if re.search("^[A-Z][a-z].+$", type[0]):
+            if re.search("^[A-Z][a-zåæø].+$", type[0]):
                 color = type
             else:
                 size = type
@@ -96,7 +96,7 @@ class ProductsSpider(scrapy.Spider):
                 'description': description,
                 'img': img,
                 'alt': alt,
-                'colors': color,
+                'color': color,
                 'size': size
             }
 
