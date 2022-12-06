@@ -37,7 +37,7 @@ module.exports = async function (context, req) {
         await insertCategory(product, knex);
     }
     await knex.destroy();
-    //await send(path, productsFile, context);
+    await send(path, productsFile, context);
     
 }
 
