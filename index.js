@@ -16,6 +16,18 @@ app.get("/login", (req, res) => {
     res.sendFile(__dirname+"/public/login/login.html");
 });
 
+app.get("/createWishlist", (req, res) => {
+    res.sendFile(__dirname+"/public/wishlist/createWishlist.html");
+});
+
+app.get("/myWishlists", (req, res) => {
+    res.sendFile(__dirname+"/public/wishlist/myWishlists.html");
+});
+
+app.get("/wishlist/:id", (req, res) => {
+    res.sendFile(__dirname+"/public/wishlist/wishlist.html");
+});
+
 const PORT = process.env.PORT || 8080
 const server = app.listen(PORT, error => {
     if (error) {
