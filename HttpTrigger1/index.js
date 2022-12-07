@@ -18,17 +18,12 @@ const httpTrigger = async function (context, req) {
         context.res.status = HTTP_CODES.BAD_REQUEST
     }
 
-    // User name is the container name
-    const containerName = req.query?.username;
-    if (!containerName) {
-        context.res.body = `username is not defined`;
-        context.res.status = HTTP_CODES.BAD_REQUEST
-    }
+    const containerName = 'profile-pictures';
 
     // `filename` is required property to use multi-part npm package
-    const fileName = req.query?.filename;
+    const fileName = `profile-picture-${req.query?.userEmail}.png`;
     if (!fileName) {
-        context.res.body = `filename is not defined`;
+        context.res.body = `userEmail is not defined`;
         context.res.status = HTTP_CODES.BAD_REQUEST
     }
 
@@ -45,10 +40,6 @@ const httpTrigger = async function (context, req) {
     }
 
     try {
-        const userName = 'profile-pictures';
-        const fileName = req.query?.filename;
-        const containerName = userName;
-
         // Each chunk of the file is delimited by a special string
         const bodyBuffer = Buffer.from(req.body);
         const boundary = multipart.getBoundary(req.headers["content-type"]);
@@ -59,11 +50,6 @@ const httpTrigger = async function (context, req) {
             context.res.body = `File buffer is incorrect`;
             context.res.status = HTTP_CODES.BAD_REQUEST
         }
-
-        // filename is a required property of the parse-multipart package
-        if (parts[0]?.filename) context.log(`Original filename = ${parts[0]?.filename}`);
-        if (parts[0]?.type) context.log(`Content type = ${parts[0]?.type}`);
-        if (parts[0]?.data?.length) context.log(`Size = ${parts[0]?.data?.length}`);
 
         // Passed to Storage
         context.bindings.storage = parts[0]?.data;

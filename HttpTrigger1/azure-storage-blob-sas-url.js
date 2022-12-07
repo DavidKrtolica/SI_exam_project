@@ -37,6 +37,8 @@ export const generateReadOnlySASUrl = async (
 
   // Create SAS URL
   const accountSasTokenUrl = await blobClient.generateSasUrl({
+    startsOn: NOW,
+    expiresOn: new Date(new Date().valueOf() + (SIXTY_MINUTES)),
     permissions: BlobSASPermissions.parse("r"), // Read only permission to the blob
     protocol: SASProtocol.Https, // Only allow HTTPS access to the blob
   });
