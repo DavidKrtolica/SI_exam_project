@@ -1,0 +1,18 @@
+{
+  "name": "si_exam_project",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "start": "func start",
+    "test": "echo \"No tests yet...\"",
+    "start-azurite": "azurite --silent --location azureStorage --debug azureStorage/debug.log"
+  },
+  "dependencies": {
+    "@azure/storage-blob": "^12.12.0",
+    "@types/parse-multipart": "^1.0.0",
+    "azurite": "^3.20.1",
+    "http-status-enum": "^1.0.2",
+    "parse-multipart": "^1.0.4"
+  }
+}
