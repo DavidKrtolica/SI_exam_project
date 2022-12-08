@@ -51,6 +51,7 @@ io.on("connection", async (socket) => {
     if (wishlistIds?.length > 0) {
         wishlistIds.forEach(async (wishlist) => {
             socket.userEmail = userEmail;
+            socket.profilePictureUrl = `https://yggrasil.blob.core.windows.net/profile-pictures/${userEmail}.png`;
             socket.join(wishlist.wishlist_id);
             const sockets = await io.in(wishlist.wishlist_id).fetchSockets();
             onlineUsers = sockets.map(socket => socket?.userEmail);
