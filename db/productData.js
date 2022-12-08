@@ -5,22 +5,31 @@ export const fetchById = async (id) =>
 
 export const fetchAll = async () => await knex.select('*').from('products');
 
-export const fetch = async ({ searchTerm, category, minPrice, maxPrice }) => {
+export const fetch = async ({
+   searchTerm,
+   category,
+   minPrice,
+   maxPrice,
+   minRating,
+}) => {
    const query = knex.select('*').from('products');
    if (searchTerm) {
       query
-         .whereLike('productName', `%${searchTerm}%`)
-         .orWhereLike('productSubTitle', `%${searchTerm}%`);
+         .whereLike('name', `%${searchTerm}%`)
+         .orWhereLike('description', `%${searchTerm}`);
    }
-
    if (category) {
-      query.where('mainCategory', category).orWhere('subCategory', category);
+      query.where('category', category);
    }
-
-   if (minPrice && maxPrice) {
-      query.where('price', '>=', minPrice).andWhere('price', '<=', maxPrice);
+   if (minPrice) {
+      query.where('price', '>=', minPrice);
    }
-
+   if (maxPrice) {
+      query.where('price', '<=', maxPrice);
+   }
+   if (minRating) {
+      query.where('rating', '>=', minRating);
+   }
    return await query;
 };
 
@@ -42,4 +51,12 @@ export const updateProduct = async (id, product) => {
       console.log(error);
       return false;
    }
+};
+
+export const fetchImageByProductId = async (productId) => {
+   return await knex
+      .select('*')
+      .from('products_images')
+      .where('product_id', productId)
+      .first();
 };
