@@ -18,38 +18,47 @@ const httpTrigger = async function (context, req) {
         context.res.status = HTTP_CODES.BAD_REQUEST
     }
 
-    const containerName = 'profile-pictures';
-
     // `filename` is required property to use multi-part npm package
-    const fileName = `profile-picture-${req.query?.userEmail}.png`;
+    const fileName = req.query?.filename;
     if (!fileName) {
-        context.res.body = `userEmail is not defined`;
+        context.res.body = `filename is not defined`;
         context.res.status = HTTP_CODES.BAD_REQUEST
     }
 
     // file content must be passed in as body
-    if (!req.body || !req.body.length) {
+    if (!req.body || !req.body.length){
         context.res.body = `Request body is not defined`;
         context.res.status = HTTP_CODES.BAD_REQUEST
     }
 
     // Content type is required to know how to parse multi-part form
-    if (!req.headers || !req.headers["content-type"]) {
+    if (!req.headers || !req.headers["content-type"]){
         context.res.body = `Content type is not sent in header 'content-type'`;
         context.res.status = HTTP_CODES.BAD_REQUEST
-    }
+    }    
 
+    context.log(`*** Username:${req.query?.username}, Filename:${req.query?.filename}, Content type:${req.headers["content-type"]}, Length:${req.body.length}`);
+    
     try {
+
+        const fileName = req.query?.filename;
+        const containerName = 'profile-pictures';
+
         // Each chunk of the file is delimited by a special string
         const bodyBuffer = Buffer.from(req.body);
         const boundary = multipart.getBoundary(req.headers["content-type"]);
         const parts = multipart.Parse(bodyBuffer, boundary);
 
         // The file buffer is corrupted or incomplete ?
-        if (!parts?.length) {
+        if (!parts?.length){
             context.res.body = `File buffer is incorrect`;
             context.res.status = HTTP_CODES.BAD_REQUEST
         }
+
+        // filename is a required property of the parse-multipart package
+        if(parts[0]?.filename)console.log(`Original filename = ${parts[0]?.filename}`);
+        if(parts[0]?.type)console.log(`Content type = ${parts[0]?.type}`);
+        if(parts[0]?.data?.length)console.log(`Size = ${parts[0]?.data?.length}`);
 
         // Passed to Storage
         context.bindings.storage = parts[0]?.data;
@@ -59,14 +68,14 @@ const httpTrigger = async function (context, req) {
             process.env.AzureWebJobsStorage,
             containerName,
             fileName);
-
-        // Returned to requestor
-        context.res.body = {
+ 
+         // Returned to requestor
+         context.res.body = {
             fileName,
             storageAccountName: sasInfo.storageAccountName,
             containerName,
             url: sasInfo.accountSasTokenUrl,
-        };
+          };
 
     } catch (err) {
         context.log.error(err.message);

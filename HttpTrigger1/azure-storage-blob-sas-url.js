@@ -10,12 +10,12 @@ import {
 * To know more about SAS URLs, see: https://docs.microsoft.com/en-us/azure/storage/common/storage-sas-overview
 * @connectionString connectionString - string
 * @param containerName - string (User's alias)
-* @param filename - string
+* @param fileName - string
 */
 export const generateReadOnlySASUrl = async (
   connectionString,
   containerName,
-  filename
+  fileName
 ) => {
 
   // get storage client
@@ -29,7 +29,7 @@ export const generateReadOnlySASUrl = async (
   );
 
   // connect to blob client
-  const blobClient = containerClient.getBlobClient(filename);
+  const blobClient = containerClient.getBlobClient(fileName);
 
   // Best practice: create time limits
   const SIXTY_MINUTES = 60 * 60 * 1000;
