@@ -13,11 +13,6 @@ export const fetch = async ({
    minRating,
 }) => {
    const query = knex.select('*').from('products');
-   if (searchTerm) {
-      query
-         .whereLike('name', `%${searchTerm}%`)
-         .orWhereLike('description', `%${searchTerm}`);
-   }
    if (category) {
       query.where('category', category);
    }
@@ -29,6 +24,12 @@ export const fetch = async ({
    }
    if (minRating) {
       query.where('rating', '>=', minRating);
+   }
+   if (searchTerm) {
+      query.where((builder) => {
+         builder.whereLike('name', `%${searchTerm}%`);
+         builder.orWhereLike('description', `%${searchTerm}%`);
+      });
    }
    return await query;
 };
