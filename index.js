@@ -102,14 +102,14 @@ io.on("connection", async (socket) => {
             const code = uuidv4();
             // adds owner of wishlist to wishlists_have_users table
             await addUserToWishlist(lastInsertedId, code, userEmail, true);
-            // adds newly created wishlist to the array
+            //TODO: adds newly created wishlist to the array
             socket.emit('createWishlistSucceeded', lastInsertedId);
         } catch (error) {
             socket.emit('createWishlistFailed', error);
         }
     })
     
-    //create new event called getWishlists
+    //TODO: create new event called getWishlists
     //which returns wishlists array 
 
     socket.on('addProductToWishlist', async ({ wishlistId, productId }) => {
