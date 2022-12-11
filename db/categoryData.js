@@ -34,9 +34,9 @@ export const isCategoryRoot = async (categoryName) => {
 
 export const fetchParentCategory = async (categoryName) => {
    const result = await knex
-      .select('*')
+      .select('category as name')
       .from('subcategories')
-      .where('category', categoryName)
+      .where('subcategory', categoryName)
       .first();
    return result;
 };
