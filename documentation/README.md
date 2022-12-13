@@ -6,7 +6,7 @@ Note: these documents are also present in this folder.
 https://docs.google.com/document/d/e/2PACX-1vTRq8GrTuPG8DqiixOnCyWKiKLWPajz2X043cBESdz2rMaDXtrS-Wq_5bF9qracEHjcYWCYBC_s9cR_/pub
 
 ### Guide to GraphQL Server
-https://docs.google.com/document/d/1iD5dd3rAFPU-3YJM_WTTDy8X4mAx5gSUDf_AyAnIbVM/edit?usp=sharing
+https://docs.google.com/document/d/e/2PACX-1vToPkR3rlVurG5tJ8WK8cr0fJmkazIdM-olsd-SHO2vvyQxbZPzP1h80ihGzulKFqIQD2hXmQ0-M540/pub
 
 ## API Documentation
 ### GraphQL server Apollo Sandbox - API documentation:
