@@ -27,11 +27,12 @@ function submitLogin() {
         if(response.status == 'Unauthorized') {
             alert("Error occured - "+response.description);    
         } else {
-            //console.log(JSON.stringify(response));
-            //console.log(response);
             //STATUS SUCCESS - WE GET ACCESS AND REFRESH TOKEN
-            console.log("THIS IS HOW YOU ACCESS THE ACCESS TOKEN: "+response.data.accessToken);
-            console.log("THIS IS HOW YOU ACCESS THE REFRESH TOKEN: "+response.data.refreshToken);
+            //console.log("THIS IS HOW YOU ACCESS THE ACCESS TOKEN: "+response.data.accessToken);
+            //console.log("THIS IS HOW YOU ACCESS THE REFRESH TOKEN: "+response.data.refreshToken);
+            window.localStorage.setItem("accessToken", response.data.accessToken);
+            window.localStorage.setItem("refreshToken", response.data.refreshToken);
+            window.location.href = "/myWishlists";
         }
     });
 };

@@ -1,5 +1,5 @@
-function submitCreateWishlist() {
-    const form = document.getElementById("new-wishlist-form");
+/*function submitCreateWishlist() {
+    //const form = document.getElementById("new-wishlist-form");
     //form.wishlistName.value
     //ADD FUNCTIONALITY TO CREATE A NEW WISHLIST AND SAVE IT
 }
@@ -25,4 +25,7 @@ function submitInvite() {
     //form.inviteEmail.value
     //FUNCTION EXECUTED WHEN A FRIEND IS INVITED BY EMAIL
     //FROM THE "wishlist" HTML PAGE FORM
-}
+}*/
+
+//RETRIEVAL OF ACCESS AND REFRESH TOKEN STORED IN WINDOW.LOCALSTORAGE, CAN BE USED FOR ALL NECESSARY REQUESTS
+console.log("ON WISHLIST PAGE, WITH TOKENS FROM LOCAL STORAGE: \n{\n  accessToken: "+window.localStorage.getItem("accessToken")+",\n  refreshToken: "+window.localStorage.getItem("refreshToken")+"\n}");
