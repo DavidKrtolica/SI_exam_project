@@ -61,6 +61,15 @@ io.on("connection", async (socket) => {
         });
     }
 
+    socket.on('getWishlists', async () => {
+        try {
+            const result = await getWishlistsByUserEmail(userEmail);
+            socket.emit('getWishlistsSucceeded', { result });
+        } catch (error) {
+            socket.emit('getWishlistsFailed', error);
+        }
+    })
+
     socket.on('invite', async ({ wishlistId, wishlistName, emailTo }) => {
 
         // checks if the passed wishlist id is included in the wishlists of this user
@@ -98,7 +107,7 @@ io.on("connection", async (socket) => {
 
     socket.on('createWishlist', async ({ wishlistName }) => {
         try {
-            const lastInsertedId = await createNewWishlist(wishlistName, userId);
+            const lastInsertedId = await createNewWishlist(wishlistName, userEmail);
             const code = uuidv4();
             // adds owner of wishlist to wishlists_have_users table
             await addUserToWishlist(lastInsertedId, code, userEmail, true);
@@ -172,12 +181,12 @@ const MySQLConnection = mysql.createConnection({
     }
 });
 
-const createNewWishlist = async (wishlistName, userId) => {
+const createNewWishlist = async (wishlistName, userEmail) => {
     return new Promise(async (resolve, reject) => {
         MySQLConnection.query(
             'INSERT INTO wishlists SET ?', {
             name: wishlistName,
-            user_id: userId,
+            user_email: userEmail,
             created_at: new Date().toISOString().slice(0, 19).replace('T', ' '),
         },
             function (error, results, fields) {
@@ -222,6 +231,23 @@ const getWishlistIdsByUserEmail = async (userEmail) => {
     return new Promise(async (resolve, reject) => {
         MySQLConnection.query(
             'SELECT wishlist_id FROM wishlists_have_users WHERE user_email = ?', [userEmail],
+            function (error, results, fields) {
+                if (error) {
+                    console.log(error);
+                    reject(error);
+                }
+                resolve(results);
+            });
+    });
+}
+
+//returns an array of wishlist ids, created by (user email), and wishlist name
+const getWishlistsByUserEmail = async (userEmail) => {
+    return new Promise(async (resolve, reject) => {
+        MySQLConnection.query(
+            'SELECT w.id AS wishlist_id, w.name AS wishlist_name, w.user_email AS created_by,' + 
+            ' w.created_at AS created_at FROM wishlists w JOIN wishlists_have_users wu ON w.id = wu.wishlist_id' + 
+            ' where wu.user_email = ?', [userEmail],
             function (error, results, fields) {
                 if (error) {
                     console.log(error);
