@@ -19,7 +19,7 @@ const getFriendsData = async () => {
     });
     let wishlistId = params.id;
     const wishlistData = result.friends[wishlistId];
-    process(wishlistData);
+    processFriendsData(wishlistData);
   })
 }
 
@@ -29,8 +29,16 @@ const getWishlistData = async () => { }
 getFriendsData();
 
 const processFriendsData = (data) => {
-  console.log(data);
-  //TODO: create dom elements
+  for (const property in data) {
+    for (const friend of data[property]) {
+      const friendsList = document.getElementById("friends-list");
+      newLiElement = document.createElement("li");
+      newText = document.createTextNode(`${friend.userEmail} - ${property}`);
+      newLiElement.appendChild(newText);
+      newLiElement.classList.add("list-group-item");
+      friendsList.appendChild(newLiElement);
+    }
+  }
 }
 
 // products and wl name
