@@ -34,7 +34,7 @@ app.get('/', (req, res) => {
 })
 
 // get wishlists
-app.get('/wishlists', async (req, res) => {
+app.post('/wishlists', async (req, res) => {
     try {
         const accessToken = req.body.accessToken;
         const parsedToken = parseJwt(accessToken);
