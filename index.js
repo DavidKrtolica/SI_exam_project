@@ -205,13 +205,13 @@ app.get("/auth/acceptInvite", async (req, res) => {
         if(emailExists) {
             //login with code query param
             //right now redirects to our client
-            let urlLogin = new URL("https://integrate-authentication-service.azurewebsites.net/login");
+            let urlLogin = new URL("https://integrate-authentication-service.azurewebsites.net/login"); // --> CHANGE TO REDIRECT TO PARTNER GROUP CLIENT 
             urlLogin.searchParams.set('code', inviteCode); 
             res.redirect(307, urlLogin);
         } else {
             //register with code query param
             //right now redirects to our client
-            let urlRegister = new URL("https://integrate-authentication-service.azurewebsites.net/register");
+            let urlRegister = new URL("https://integrate-authentication-service.azurewebsites.net/register"); // --> CHANGE TO REDIRECT TO PARTNER GROUP CLIENT
             urlRegister.searchParams.set('code', inviteCode); 
             res.redirect(307, urlRegister);
         }
