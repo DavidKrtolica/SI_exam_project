@@ -65,7 +65,7 @@ app.post('/create-wishlist', async (req, res) => {
 
 io.on("connection", async (socket) => {
 
-    let userEmail, wishlistIds, onlineUsers;
+    let userEmail, wishlistIds, allUsers, onlineUsers;
 
     try {
         const accessToken = socket.handshake.headers['authorization'];
@@ -81,7 +81,6 @@ io.on("connection", async (socket) => {
         socket.userEmail = userEmail;
         socket.profilePictureUrl = `https://yggrasil.blob.core.windows.net/profile-pictures/${userEmail}.png`;
 
-        let allUsers;
         const promises = wishlistIds.map(async ({ wishlist_id }) => {
             socket.join(wishlist_id);
             allUsers = await getUsersByWishlist(wishlist_id);
@@ -93,21 +92,18 @@ io.on("connection", async (socket) => {
         onlineUsers = sockets.map(socket => socket?.userEmail);
 
         let friends = {};
-
         allUsers.map((users) => {
             const id = Object.keys(users)[0];
             const all = users[Object.keys(users)[0]];
             const online = all.filter(e => onlineUsers.indexOf(e.userEmail) !== -1);
             const offline = all.filter(e => onlineUsers.indexOf(e.userEmail) === -1 && e.code === null);
-            const notRegistered = all.filter(e => e.code !== null);
+            const notRegistered = all.filter(e => onlineUsers.indexOf(e.userEmail) === -1 && e.code !== null);
             friends[id] = {
                 online,
                 offline,
                 notRegistered,
             }
         })
-
-        console.log('friends = ', friends);
 
         socket.emit('friends', { friends });
         socket.to(wishlistIds.map(e => e.wishlist_id)).emit('friends', { friends });
@@ -163,8 +159,6 @@ io.on("connection", async (socket) => {
     })
 
     socket.on('disconnect', async () => {
-        let allUsers;
-
         const promises = wishlistIds.map(async ({ wishlist_id }) => {
             socket.join(wishlist_id);
             allUsers = await getUsersByWishlist(wishlist_id);
@@ -190,9 +184,7 @@ io.on("connection", async (socket) => {
                 notRegistered,
             }
         })
-
-        console.log('friends = ', friends);
-
+        
         socket.emit('friends', { friends });
         socket.to(wishlistIds.map(e => e.wishlist_id)).emit('friends', { friends });
     })
