@@ -4,48 +4,50 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-        integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi"
-        crossorigin="anonymous"
-    />
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous" />
     <title>My Wishlists</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"
+        integrity="sha384-/KNQL8Nu5gCHLqwqfQjA689Hhoqgi2S84SNUxC3roTe4EhJ9AfLkp8QiQcU8AMzI" crossorigin="anonymous">
+        </script>
 </head>
+
 <body>
 
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-          <div class="navbar-nav">
-            <a class="nav-item nav-link active" href="/myWishlists">My Wishlists</a>
-            <a class="nav-item nav-link" href="/createWishlist">Create new Wishlist</a>
-            <a class="nav-item nav-link" href="/wishlist/wardrobeWishlist">Wardrobe Wishlist</a>
-          </div>
+            <div class="navbar-nav">
+                <a class="nav-item nav-link active" href="/myWishlists">My Wishlists</a>
+                <a class="nav-item nav-link" href="/createWishlist">Create new Wishlist</a>
+                <a class="nav-item nav-link" href="/wishlist/wardrobeWishlist">Wardrobe Wishlist</a>
+            </div>
         </div>
     </nav>
 
     <section class="vh-100" style="background-color: #eee">
         <div class="container h-100">
-           <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="row d-flex justify-content-center align-items-center h-100">
                 <div class="col-lg-12 col-xl-11">
                     <div class="card text-black" style="border-radius: 25px">
-                        <div
-                        class="card-body p-md-5"
-                        style="
+                        <div class="card-body p-md-5" style="
                             padding-bottom: 0 !important;
                             padding-top: 1.5rem !important;
-                        "
-                        >
+                        ">
                             <div class="row justify-content-center">
                                 <div class="col-md-20 col-lg-12 col-xl-15 order-2 order-lg-1">
-                                    <p class="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">
-                                    My Wishlists
-                                    </p>
-                                    <ol class="list-group list-group-numbered" style="margin-bottom: 30px;">
-                                        <li class="list-group-item">x-mas Wishlist</li>
-                                        <li class="list-group-item">Easter Wishlist</li>
-                                        <li class="list-group-item">Wardrobe Wishlist</li>
-                                    </ol>  
+                                    <p class="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">My wishlists</p>
+                                    <table id="wishlist-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Created by</th>
+                                                <th>Date</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -55,11 +57,16 @@
         </div>
     </section>
 
-    <script src="../wishlist/wishlist.js"></script>
-    <script
-        src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
+    <script src="../wishlist/myWishlists.js"></script>
+    <script>
+        function navigateToWishlist(e) {
+            const dirLocation = document.URL.substr(0,document.URL.lastIndexOf('/'));
+            window.location = dirLocation + `/wishlist.html?id=${document.activeElement.id}`;
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
-        crossorigin="anonymous"
-    ></script>
+        crossorigin="anonymous"></script>
 </body>
+
 </html>
