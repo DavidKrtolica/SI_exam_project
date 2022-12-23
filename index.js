@@ -40,7 +40,6 @@ io.on("connection", async (socket) => {
     try {
         const accessToken = socket.handshake.headers['authorization'];
         const parsedToken = parseJwt(accessToken);
-        userId = parsedToken.user_id;
         userEmail = parsedToken.email;
     } catch (error) {
         socket.emit('authFailed', error);
@@ -49,7 +48,6 @@ io.on("connection", async (socket) => {
     // gets the wishlist ids that the user created/is invited
     wishlistIds = await getWishlistIdsByUserEmail(userEmail);
     if (wishlistIds?.length > 0) {
-        
         socket.userEmail = userEmail;
         socket.profilePictureUrl = `https://yggrasil.blob.core.windows.net/profile-pictures/${userEmail}.png`;
 
