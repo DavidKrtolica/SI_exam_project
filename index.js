@@ -33,6 +33,36 @@ app.get('/', (req, res) => {
     res.status(200).send('OK');
 })
 
+// get wishlists
+app.get('/wishlists', async (req, res) => {
+    try {
+        const accessToken = req.body.accessToken;
+        const parsedToken = parseJwt(accessToken);
+        const userEmail = parsedToken.email;
+        const result = await getWishlistsByUserEmail(userEmail);
+        res.status(200).send(result);
+    } catch (error) {
+        res.status(500).send(error);
+    }
+})
+
+// get wishlists
+app.post('/create-wishlist', async (req, res) => {
+    try {
+        const accessToken = req.body.accessToken;
+        const parsedToken = parseJwt(accessToken);
+        const userEmail = parsedToken.email;
+        const wishlistName = req.body.wishlistName;
+        const lastInsertedId = await createNewWishlist(wishlistName, userEmail);
+        const code = uuidv4();
+        // adds owner of wishlist to wishlists_have_users table
+        await addUserToWishlist(lastInsertedId, code, userEmail, true);
+        res.status(200).send(`${lastInsertedId}`);
+    } catch (error) {
+        res.status(500).send(error);
+    }
+})
+
 io.on("connection", async (socket) => {
 
     let userEmail, wishlistIds, onlineUsers;
@@ -58,7 +88,7 @@ io.on("connection", async (socket) => {
             return { [wishlist_id]: allUsers };
         });
         allUsers = await Promise.all(promises);
-        
+
         const sockets = await io.in(wishlistIds.map(e => e.wishlist_id)).fetchSockets();
         onlineUsers = sockets.map(socket => socket?.userEmail);
 
@@ -82,15 +112,6 @@ io.on("connection", async (socket) => {
         socket.emit('friends', { friends });
         socket.to(wishlistIds.map(e => e.wishlist_id)).emit('friends', { friends });
     }
-
-    socket.on('getWishlists', async () => {
-        try {
-            const result = await getWishlistsByUserEmail(userEmail);
-            socket.emit('getWishlistsSucceeded', { result });
-        } catch (error) {
-            socket.emit('getWishlistsFailed', error);
-        }
-    })
 
     socket.on('invite', async ({ wishlistId, wishlistName, emailTo }) => {
 
@@ -127,19 +148,6 @@ io.on("connection", async (socket) => {
         }
     })
 
-    socket.on('createWishlist', async ({ wishlistName }) => {
-        try {
-            const lastInsertedId = await createNewWishlist(wishlistName, userEmail);
-            const code = uuidv4();
-            // adds owner of wishlist to wishlists_have_users table
-            await addUserToWishlist(lastInsertedId, code, userEmail, true);
-            //TODO: adds newly created wishlist to the array
-            socket.emit('createWishlistSucceeded', lastInsertedId);
-        } catch (error) {
-            socket.emit('createWishlistFailed', error);
-        }
-    })
-
     socket.on('addProductToWishlist', async ({ wishlistId, productId }) => {
         try {
             // checks if the passed wishlist id is included in the wishlists of this user
@@ -164,7 +172,7 @@ io.on("connection", async (socket) => {
         });
 
         allUsers = await Promise.all(promises);
-        
+
         const sockets = await io.in(wishlistIds.map(e => e.wishlist_id)).fetchSockets();
         onlineUsers = sockets.map(socket => socket?.userEmail);
 
