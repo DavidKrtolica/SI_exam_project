@@ -33,7 +33,7 @@ app.get('/', (req, res) => {
     res.status(200).send('OK');
 })
 
-// get wishlists
+// get my wishlists
 app.post('/wishlists', async (req, res) => {
     try {
         const accessToken = req.body.accessToken;
@@ -46,7 +46,6 @@ app.post('/wishlists', async (req, res) => {
     }
 })
 
-// get wishlists
 app.post('/create-wishlist', async (req, res) => {
     try {
         const accessToken = req.body.accessToken;
@@ -58,6 +57,56 @@ app.post('/create-wishlist', async (req, res) => {
         // adds owner of wishlist to wishlists_have_users table
         await addUserToWishlist(lastInsertedId, code, userEmail, true);
         res.status(200).send(`${lastInsertedId}`);
+    } catch (error) {
+        res.status(500).send(error);
+    }
+})
+
+// invite a friend to join a wishlist
+app.post('/invite', async (req, res) => {
+    try {
+        const accessToken = req.body.accessToken;
+        const parsedToken = parseJwt(accessToken);
+        const userEmail = parsedToken.email;
+
+        const wishlistId = req.body.wishlistId;
+        const wishlistName = req.body.wishlistName;
+        const emailTo = req.body.emailTo;
+
+        // checks if passed email has valid pattern
+        const validEmailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+        if (!emailTo?.match(validEmailRegex)) {
+            socket.emit('inviteFailed', 'Invalid email');
+            return;
+        }
+
+        const code = uuidv4();
+
+        await addUserToWishlist(wishlistId, code, emailTo, false);
+        const serviceBusMessage = {
+            body: {
+                emailTo,
+                invitedBy: userEmail,
+                wishlistId,
+                code,
+                wishlistName,
+            }
+        };
+        await sendMessageToQueue(serviceBusMessage);
+        res.status(200).send('Success');
+    } catch (error) {
+        res.status(500).send(error);
+    }
+})
+
+app.post('/add-product-to-wishlist', async (req, res) => {
+    try {
+        const wishlistId = req.body.wishlistId;
+        const productId = req.body.productId;
+        const size = req.body.size;
+        const color = req.body.color;
+        await addProductToWishlist(wishlistId, productId, size, color);
+        res.status(200).send('Success');
     } catch (error) {
         res.status(500).send(error);
     }
@@ -109,55 +158,6 @@ io.on("connection", async (socket) => {
         socket.to(wishlistIds.map(e => e.wishlist_id)).emit('friends', { friends });
     }
 
-    socket.on('invite', async ({ wishlistId, wishlistName, emailTo }) => {
-
-        // checks if the passed wishlist id is included in the wishlists of this user
-        if (wishlistIds.filter(wishlist => wishlist.wishlist_id === wishlistId).length === 0) {
-            socket.emit('inviteFailed', 'Invalid wishlist id');
-            return;
-        }
-
-        // checks if passed email has valid pattern
-        const validEmailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
-        if (!emailTo?.match(validEmailRegex)) {
-            socket.emit('inviteFailed', 'Invalid email');
-            return;
-        }
-
-        const code = uuidv4();
-
-        try {
-            await addUserToWishlist(wishlistId, code, emailTo, false);
-            const serviceBusMessage = {
-                body: {
-                    emailTo,
-                    invitedBy: userEmail,
-                    wishlistId,
-                    code,
-                    wishlistName,
-                }
-            };
-            await sendMessageToQueue(serviceBusMessage);
-            socket.emit('inviteSucceeded');
-        } catch (error) {
-            socket.emit('inviteFailed', error);
-        }
-    })
-
-    socket.on('addProductToWishlist', async ({ wishlistId, productId }) => {
-        try {
-            // checks if the passed wishlist id is included in the wishlists of this user
-            if (wishlistIds.filter(wishlist => wishlist.wishlist_id === wishlistId).length === 0) {
-                socket.emit('addProductFailed', 'Invalid wishlist id');
-                return;
-            }
-            await addProductToWishlist(wishlistId, productId);
-            socket.emit('addProductSucceeded');
-        } catch (error) {
-            socket.emit('addProductFailed', error);
-        }
-    })
-
     socket.on('disconnect', async () => {
         const promises = wishlistIds.map(async ({ wishlist_id }) => {
             socket.join(wishlist_id);
@@ -184,7 +184,7 @@ io.on("connection", async (socket) => {
                 notRegistered,
             }
         })
-        
+
         socket.emit('friends', { friends });
         socket.to(wishlistIds.map(e => e.wishlist_id)).emit('friends', { friends });
     })
@@ -247,10 +247,10 @@ const createNewWishlist = async (wishlistName, userEmail) => {
     });
 }
 
-const addProductToWishlist = async (wishlistId, productId) => {
+const addProductToWishlist = async (wishlistId, productId, size, color) => {
     return new Promise(async (resolve, reject) => {
         MySQLConnection.query(
-            'INSERT INTO wishlists_have_products VALUES (?, ?)', [wishlistId, productId],
+            'INSERT INTO wishlists_have_products VALUES (?, ?, ?, ?)', [wishlistId, productId, size, color],
             function (error, results, fields) {
                 if (error) {
                     console.log(error);
