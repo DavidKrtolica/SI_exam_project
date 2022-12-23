@@ -35,7 +35,7 @@ app.get('/', (req, res) => {
 
 io.on("connection", async (socket) => {
 
-    let userEmail, userId, wishlistIds, onlineUsers;
+    let userEmail, wishlistIds, onlineUsers;
 
     try {
         const accessToken = socket.handshake.headers['authorization'];
@@ -49,16 +49,40 @@ io.on("connection", async (socket) => {
     // gets the wishlist ids that the user created/is invited
     wishlistIds = await getWishlistIdsByUserEmail(userEmail);
     if (wishlistIds?.length > 0) {
-        wishlistIds.forEach(async (wishlist) => {
-            socket.userEmail = userEmail;
-            socket.profilePictureUrl = `https://yggrasil.blob.core.windows.net/profile-pictures/${userEmail}.png`;
-            socket.join(wishlist.wishlist_id);
-            const sockets = await io.in(wishlist.wishlist_id).fetchSockets();
-            onlineUsers = sockets.map(socket => socket?.userEmail);
-            const onlineUsersUniqueValues = [...new Set(onlineUsers)];
-            socket.emit('onlineUsers', { onlineUsersUniqueValues });
-            socket.to(wishlist.wishlist_id).emit('onlineUsers', { onlineUsersUniqueValues });
+        
+        socket.userEmail = userEmail;
+        socket.profilePictureUrl = `https://yggrasil.blob.core.windows.net/profile-pictures/${userEmail}.png`;
+
+        let allUsers;
+        const promises = wishlistIds.map(async ({ wishlist_id }) => {
+            socket.join(wishlist_id);
+            allUsers = await getUsersByWishlist(wishlist_id);
+            return { [wishlist_id]: allUsers };
         });
+        allUsers = await Promise.all(promises);
+        
+        const sockets = await io.in(wishlistIds.map(e => e.wishlist_id)).fetchSockets();
+        onlineUsers = sockets.map(socket => socket?.userEmail);
+
+        let friends = {};
+
+        allUsers.map((users) => {
+            const id = Object.keys(users)[0];
+            const all = users[Object.keys(users)[0]];
+            const online = all.filter(e => onlineUsers.indexOf(e.userEmail) !== -1);
+            const offline = all.filter(e => onlineUsers.indexOf(e.userEmail) === -1 && e.code === null);
+            const notRegistered = all.filter(e => e.code !== null);
+            friends[id] = {
+                online,
+                offline,
+                notRegistered,
+            }
+        })
+
+        console.log('friends = ', friends);
+
+        socket.emit('friends', { friends });
+        socket.to(wishlistIds.map(e => e.wishlist_id)).emit('friends', { friends });
     }
 
     socket.on('getWishlists', async () => {
@@ -117,9 +141,6 @@ io.on("connection", async (socket) => {
             socket.emit('createWishlistFailed', error);
         }
     })
-    
-    //TODO: create new event called getWishlists
-    //which returns wishlists array 
 
     socket.on('addProductToWishlist', async ({ wishlistId, productId }) => {
         try {
@@ -136,13 +157,38 @@ io.on("connection", async (socket) => {
     })
 
     socket.on('disconnect', async () => {
-        wishlistIds.forEach(async (wishlist) => {
-            const sockets = await io.in(wishlist.wishlist_id).fetchSockets();
-            onlineUsers = sockets.map(socket => socket?.userEmail);
-            const onlineUsersUniqueValues = [...new Set(onlineUsers)];
-            socket.emit('onlineUsers', { onlineUsersUniqueValues });
-            socket.to(wishlist.wishlist_id).emit('onlineUsers', { onlineUsersUniqueValues });
+        let allUsers;
+
+        const promises = wishlistIds.map(async ({ wishlist_id }) => {
+            socket.join(wishlist_id);
+            allUsers = await getUsersByWishlist(wishlist_id);
+            return { [wishlist_id]: allUsers };
         });
+
+        allUsers = await Promise.all(promises);
+        
+        const sockets = await io.in(wishlistIds.map(e => e.wishlist_id)).fetchSockets();
+        onlineUsers = sockets.map(socket => socket?.userEmail);
+
+        let friends = {};
+
+        allUsers.map((users) => {
+            const id = Object.keys(users)[0];
+            const all = users[Object.keys(users)[0]];
+            const online = all.filter(e => onlineUsers.indexOf(e.userEmail) !== -1);
+            const offline = all.filter(e => onlineUsers.indexOf(e.userEmail) === -1 && e.code === null);
+            const notRegistered = all.filter(e => e.code !== null);
+            friends[id] = {
+                online,
+                offline,
+                notRegistered,
+            }
+        })
+
+        console.log('friends = ', friends);
+
+        socket.emit('friends', { friends });
+        socket.to(wishlistIds.map(e => e.wishlist_id)).emit('friends', { friends });
     })
 })
 
@@ -249,9 +295,23 @@ const getWishlistIdsByUserEmail = async (userEmail) => {
 const getWishlistsByUserEmail = async (userEmail) => {
     return new Promise(async (resolve, reject) => {
         MySQLConnection.query(
-            'SELECT w.id AS wishlist_id, w.name AS wishlist_name, w.user_email AS created_by,' + 
-            ' w.created_at AS created_at FROM wishlists w JOIN wishlists_have_users wu ON w.id = wu.wishlist_id' + 
+            'SELECT w.id AS wishlist_id, w.name AS wishlist_name, w.user_email AS created_by,' +
+            ' w.created_at AS created_at FROM wishlists w JOIN wishlists_have_users wu ON w.id = wu.wishlist_id' +
             ' where wu.user_email = ?', [userEmail],
+            function (error, results, fields) {
+                if (error) {
+                    console.log(error);
+                    reject(error);
+                }
+                resolve(results);
+            });
+    });
+}
+
+const getUsersByWishlist = async (wishlistId) => {
+    return new Promise(async (resolve, reject) => {
+        MySQLConnection.query(
+            'SELECT wu.code, wu.user_email AS userEmail FROM wishlists_have_users wu WHERE wishlist_id = ?', [wishlistId],
             function (error, results, fields) {
                 if (error) {
                     console.log(error);
