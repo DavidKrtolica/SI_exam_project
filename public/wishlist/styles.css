@@ -1,0 +1,13 @@
+#inputContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+#inputLabel {
+    margin-right: 1em;
+}
+
+#message {
+    color: grey;
+}
