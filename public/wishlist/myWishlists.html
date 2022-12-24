@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -17,8 +18,8 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav">
-                <a class="nav-item nav-link active" href="/myWishlists">Wishlists</a>
-                <a class="nav-item nav-link" href="/createWishlist">+ New Wishlist</a>
+                <a class="nav-item nav-link pointer" onclick="navigate('myWishlists')">Wishlists</a>
+                <a class="nav-item nav-link pointer" onclick="navigate('createWishlist')">+ New Wishlist</a>
             </div>
         </div>
     </nav>
@@ -58,8 +59,13 @@
     <script src="../wishlist/myWishlists.js"></script>
     <script>
         function navigateToWishlist(e) {
-            const dirLocation = document.URL.substr(0,document.URL.lastIndexOf('/'));
+            const dirLocation = document.URL.substr(0, document.URL.lastIndexOf('/'));
             window.location = dirLocation + `/wishlist.html?id=${document.activeElement.id}`;
+        }
+        
+        function navigate(route) {
+            const dirLocation = document.URL.substr(0, document.URL.lastIndexOf('/'));
+            window.location = dirLocation + `/${route}.html`;
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
