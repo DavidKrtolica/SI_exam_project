@@ -145,8 +145,8 @@ io.on("connection", async (socket) => {
             const id = Object.keys(users)[0];
             const all = users[Object.keys(users)[0]];
             const online = all.filter(e => onlineUsers.indexOf(e.userEmail) !== -1);
-            const offline = all.filter(e => onlineUsers.indexOf(e.userEmail) === -1 && e.code === null);
-            const notRegistered = all.filter(e => onlineUsers.indexOf(e.userEmail) === -1 && e.code !== null);
+            const offline = all.filter(e => onlineUsers.indexOf(e.userEmail) === -1 && !e.code);
+            const notRegistered = all.filter(e => onlineUsers.indexOf(e.userEmail) === -1 && e.code);
             friends[id] = {
                 online,
                 offline,
