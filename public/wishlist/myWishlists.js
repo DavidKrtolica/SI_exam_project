@@ -46,6 +46,7 @@ const processResult = (result) => {
                 case 3:
                     // Append a text node to the cell - action button
                     node = document.createElement('button');
+                    node.classList.add('btn', 'btn-primary');
                     node.textContent = 'View';
                     node.id = element.wishlist_id
                     node.onclick = navigateToWishlist;
