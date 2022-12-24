@@ -53,9 +53,8 @@ app.post('/create-wishlist', async (req, res) => {
         const userEmail = parsedToken.email;
         const wishlistName = req.body.wishlistName;
         const lastInsertedId = await createNewWishlist(wishlistName, userEmail);
-        const code = uuidv4();
         // adds owner of wishlist to wishlists_have_users table
-        await addUserToWishlist(lastInsertedId, code, userEmail, true);
+        await addUserToWishlist(lastInsertedId, null, userEmail, true);
         res.status(200).send(`${lastInsertedId}`);
     } catch (error) {
         res.status(500).send(error);
