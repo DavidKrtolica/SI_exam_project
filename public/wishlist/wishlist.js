@@ -20,6 +20,7 @@ const getFriendsData = async () => {
     });
     let wishlistId = params.id;
     const wishlistData = result.friends[wishlistId];
+    document.querySelectorAll('.friend').forEach(e => e.remove());
     processFriendsData(wishlistData);
   })
 }
@@ -36,7 +37,7 @@ const processFriendsData = (data) => {
       newLiElement = document.createElement("li");
       newText = document.createTextNode(`${friend.userEmail} - ${property}`);
       newLiElement.appendChild(newText);
-      newLiElement.classList.add("list-group-item");
+      newLiElement.classList.add("list-group-item", 'friend');
       friendsList.appendChild(newLiElement);
     }
   }
