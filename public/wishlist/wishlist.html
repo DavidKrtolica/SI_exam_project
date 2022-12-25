@@ -36,9 +36,16 @@
                         ">
                             <div class="row justify-content-center">
                                 <div class="col-md-20 col-lg-12 col-xl-15 order-2 order-lg-1">
-                                    <p id="wishlist-name" class="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">
-                                        Wardrobe Wishlist
-                                    </p>
+                                    <p id="wishlist-name" class="text-center h1 fw-bold "></p>
+                                    
+                                    <div class="text-center">
+                                        <span>Created by:</span>
+                                        <span id="user-email" class="text-center fw-bold mb-5 mx-1 mx-md-4 mt-4"></span>
+                                        <span>Date:</span>
+                                        <span id="created-at" class="text-center fw-bold mb-5 mx-1 mx-md-4 mt-4"></span>
+                                    </div>
+
+                                    <div id="spacer"></div>
                                     <h5>Invite a friend:</h5>
                                     <form class="mx-1 mx-md-4" id="invite-friend-form"
                                         action="javascript:submitInvite()">
@@ -54,10 +61,7 @@
                                         style="margin-bottom: 30px;">
                                     </ol>
                                     <h5>Products:</h5>
-                                    <ol class="list-group list-group-numbered" style="margin-bottom: 30px;">
-                                        <li class="list-group-item">T-Shirt, XXL</li>
-                                        <li class="list-group-item">Jeans, L</li>
-                                        <li class="list-group-item">Red Beanie</li>
+                                    <ol id="products-list" class="list-group list-group-numbered" style="margin-bottom: 30px;">
                                     </ol>
                                 </div>
                             </div>

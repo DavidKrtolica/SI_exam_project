@@ -8,8 +8,7 @@ const submitCreateWishlist = async () => {
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ accessToken: accessToken, 
-    wishlistName: input }),
+    body: JSON.stringify({ accessToken, wishlistName: input }),
   }).then(async (response) => {
     const result = await response.json();
     document.getElementById('message').innerHTML=`Wishlist with id ${result} created`;
