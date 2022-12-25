@@ -111,6 +111,27 @@ app.post('/add-product-to-wishlist', async (req, res) => {
     }
 })
 
+app.post('/get-wishlist-details', async (req, res) => {
+    try {
+        const wishlistId = req.body.wishlistId;
+        const result = await getWishlistDetails(wishlistId);
+        if (result.length === 0) throw 'Invalid wishlist id';
+        res.status(200).send(result[0]);
+    } catch (error) {
+        res.status(500).send(error);
+    }
+})
+
+app.post('/get-wishlist-products', async (req, res) => {
+    try {
+        const wishlistId = req.body.wishlistId;
+        const result = await getWishlistProducts(wishlistId);
+        res.status(200).send(result);
+    } catch (error) {
+        res.status(500).send(error);
+    }
+})
+
 io.on("connection", async (socket) => {
 
     let userEmail, wishlistIds, allUsers, onlineUsers;
@@ -309,6 +330,34 @@ const getUsersByWishlist = async (wishlistId) => {
     return new Promise(async (resolve, reject) => {
         MySQLConnection.query(
             'SELECT wu.code, wu.user_email AS userEmail FROM wishlists_have_users wu WHERE wishlist_id = ?', [wishlistId],
+            function (error, results, fields) {
+                if (error) {
+                    console.log(error);
+                    reject(error);
+                }
+                resolve(results);
+            });
+    });
+}
+
+const getWishlistDetails = async (wishlistId) => {
+    return new Promise(async (resolve, reject) => {
+        MySQLConnection.query(
+            'SELECT * FROM wishlists WHERE id = ?', [wishlistId],
+            function (error, results, fields) {
+                if (error) {
+                    console.log(error);
+                    reject(error);
+                }
+                resolve(results);
+            });
+    });
+}
+
+const getWishlistProducts = async (wishlistId) => {
+    return new Promise(async (resolve, reject) => {
+        MySQLConnection.query(
+            'SELECT product_id, size, color FROM wishlists_have_products WHERE wishlist_id = ?', [wishlistId],
             function (error, results, fields) {
                 if (error) {
                     console.log(error);
