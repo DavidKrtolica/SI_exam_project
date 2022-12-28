@@ -17,6 +17,8 @@
     "mysql": "^2.18.1",
     "nodemon": "^2.0.19",
     "socket.io": "^4.5.2",
+    "swagger-jsdoc": "^6.2.7",
+    "swagger-ui-express": "^4.6.0",
     "uuid": "^9.0.0"
   },
   "repository": {

@@ -8,6 +8,30 @@ import cors from 'cors';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
+import swaggerUi from 'swagger-ui-express';
+import swaggerJsDoc from 'swagger-jsdoc'; 
+
+const swaggerOptions = {
+    definition: {
+        openapi: "3.0.0",
+        info: {
+            title: "REST API",
+        }
+    },
+    apis: ['./index.js']
+}
+
+const swaggerSpec = swaggerJsDoc(swaggerOptions);
+
+const swaggerDocs = (app, port) => {
+    app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+    app.get("docs.json", (req, res) => {
+        res.setHeader("Content-Type", "application/json");
+        res.send(swaggerSpec);
+    }) 
+}
+
 const app = express();
 
 const server = http.createServer(app);
@@ -28,12 +52,73 @@ app.use(express.json());
 
 app.use(cors());
 
-// health checker
-app.get('/', (req, res) => {
+/**
+ * @openapi
+ * /healthcheck:
+ *  get:
+ *   tags:
+ *   - Healthcheck
+ *   description: Responds if the app is up and running
+ *   responses: 
+ *    200:
+ *     description: App is up and running
+ */
+app.get('/healthcheck', (req, res) => {
     res.status(200).send('OK');
 })
 
-// get my wishlists
+/**
+ * @openapi
+ * /wishlists:
+ *  post:
+ *   tags:
+ *   - Wishlists
+ *   summary: Get wishlists of a user
+ *   requestBody:
+ *    required: true
+ *    content:
+ *     application/json:
+ *      schema:
+ *       type: object
+ *       required:
+ *        - accessToken
+ *       properties:
+ *        accessToken:
+ *         type: string
+ *   responses:
+ *    200:
+ *     description: Success
+ *     content:
+ *      application/json:
+ *       schema:
+ *        $ref: '#/components/schemas/GetWishlistsResponse'
+ *    500: 
+ *     description: Error
+ *     content:
+ *      application/json:
+ *       schema:
+ *        $ref: '#/components/schemas/ErrorResponse'
+ * components:
+ *  schemas:  
+ *   GetWishlistsResponse:
+ *    type: array
+ *    items:
+ *     type: object
+ *     properties:
+ *      wishlist_id:
+ *       type: number
+ *      wishlist_name:
+ *       type: string
+ *      created_by:
+ *       type: string
+ *      created_at:
+ *       type: string
+ *   ErrorResponse:
+ *    type: object  
+ *    properties:
+ *     code:
+ *      type: string
+ */
 app.post('/wishlists', async (req, res) => {
     try {
         const accessToken = req.body.accessToken;
@@ -46,6 +131,50 @@ app.post('/wishlists', async (req, res) => {
     }
 })
 
+/**
+ * @openapi
+ * /create-wishlist:
+ *  post:
+ *   tags:
+ *   - Wishlists
+ *   summary: Create a new wishlist
+ *   requestBody:
+ *    required: true
+ *    content:
+ *     application/json:
+ *      schema:
+ *       $ref: '#/components/schemas/CreateWishlistInput'
+ *   responses:
+ *    200:
+ *     description: Success
+ *     content:
+ *      application/json:
+ *       schema:
+ *        $ref: '#/components/schemas/CreateWishlistResponse'
+ *    500: 
+ *     description: Error
+ *     content:
+ *      application/json:
+ *       schema:
+ *        $ref: '#/components/schemas/ErrorResponse'
+ * components:
+ *  schemas:  
+ *   CreateWishlistInput:
+ *    type: object
+ *    required:
+ *     - wishlistName
+ *     - accessToken  
+ *    properties:
+ *     wishlistName:
+ *      type: string
+ *     accessToken: 
+ *      type: string  
+ *   CreateWishlistResponse:
+ *    type: object  
+ *    properties:
+ *     lastInsertedId:
+ *      type: number
+ */
 app.post('/create-wishlist', async (req, res) => {
     try {
         const accessToken = req.body.accessToken;
@@ -61,7 +190,52 @@ app.post('/create-wishlist', async (req, res) => {
     }
 })
 
-// invite a friend to join a wishlist
+/**
+ * @openapi
+ * /invite:
+ *  post:
+ *   tags:
+ *   - Wishlists
+ *   summary: Invite a friend to join a wishlist
+ *   requestBody:
+ *    required: true
+ *    content:
+ *     application/json:
+ *      schema:
+ *       $ref: '#/components/schemas/InviteInput'
+ *   responses:
+ *    200:
+ *     description: Success
+ *     content:
+ *      text/plain:
+ *       schema:
+ *        type: string
+ *        example: 'Success'
+ *    500: 
+ *     description: Error
+ *     content:
+ *      application/json:
+ *       schema:
+ *        $ref: '#/components/schemas/ErrorResponse'
+ * components:
+ *  schemas:  
+ *   InviteInput:
+ *    type: object
+ *    required:
+ *     - wishlistId
+ *     - wishlistName
+ *     - accessToken
+ *     - emailTo  
+ *    properties:
+ *     wishlistName:
+ *      type: string
+ *     accessToken: 
+ *      type: string
+ *     wishlistId:
+ *      type: number
+ *     emailTo: 
+ *      type: string
+ */
 app.post('/invite', async (req, res) => {
     try {
         const accessToken = req.body.accessToken;
@@ -75,7 +249,7 @@ app.post('/invite', async (req, res) => {
         // checks if passed email has valid pattern
         const validEmailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
         if (!emailTo?.match(validEmailRegex)) {
-            socket.emit('inviteFailed', 'Invalid email');
+            res.status(500).send(error);
             return;
         }
 
@@ -98,6 +272,55 @@ app.post('/invite', async (req, res) => {
     }
 })
 
+/**
+ * @openapi
+ * /add-product-to-wishlist:
+ *  post:
+ *   tags:
+ *   - Wishlists
+ *   summary: Add a product to a wishlist
+ *   requestBody:
+ *    required: true
+ *    content:
+ *     application/json:
+ *      schema:
+ *       $ref: '#/components/schemas/AddProductToWishlistInput'
+ *   responses:
+ *    200:
+ *     description: Success
+ *     content:
+ *      text/plain:
+ *       schema:
+ *        type: string
+ *        example: 'Success'
+ *    500: 
+ *     description: Error
+ *     content:
+ *      application/json:
+ *       schema:
+ *        $ref: '#/components/schemas/ErrorResponse'
+ * components:
+ *  schemas:  
+ *   AddProductToWishlistInput:
+ *    type: object
+ *    required:
+ *     - wishlistId
+ *     - productId
+ *     - size
+ *     - color  
+ *     - accessToken
+ *    properties:
+ *     size:
+ *      type: string
+ *     accessToken: 
+ *      type: string
+ *     wishlistId:
+ *      type: number
+ *     color: 
+ *      type: string
+ *     productId: 
+ *      type: number
+ */
 app.post('/add-product-to-wishlist', async (req, res) => {
     try {
         const wishlistId = req.body.wishlistId;
@@ -111,6 +334,56 @@ app.post('/add-product-to-wishlist', async (req, res) => {
     }
 })
 
+/**
+ * @openapi
+ * /get-wishlist-details:
+ *  post:
+ *   tags:
+ *   - Wishlists
+ *   summary: Get wishlist details
+ *   requestBody:
+ *    required: true
+ *    content:
+ *     application/json:
+ *      schema:
+ *       $ref: '#/components/schemas/GetWishlistDetails'
+ *   responses:
+ *    200:
+ *     description: Success
+ *     content:
+ *      application/json:
+ *       schema:
+ *        $ref: '#/components/schemas/GetWishlistDetailsResponse'
+ *    500: 
+ *     description: Error
+ *     content:
+ *      application/json:
+ *       schema:
+ *        $ref: '#/components/schemas/ErrorResponse'
+ * components:
+ *  schemas:  
+ *   GetWishlistDetails:
+ *    type: object
+ *    required:
+ *     - wishlistId
+ *     - accessToken
+ *    properties:
+ *     accessToken: 
+ *      type: string
+ *     wishlistId:
+ *      type: number
+ *   GetWishlistDetailsResponse:
+ *    type: object
+ *    properties:
+ *     id: 
+ *      type: number
+ *     user_email:
+ *      type: string
+ *     name: 
+ *      type: string
+ *     created_at:
+ *      type: string
+ */
 app.post('/get-wishlist-details', async (req, res) => {
     try {
         const wishlistId = req.body.wishlistId;
@@ -122,6 +395,46 @@ app.post('/get-wishlist-details', async (req, res) => {
     }
 })
 
+/**
+ * @openapi
+ * /get-wishlist-products:
+ *  post:
+ *   tags:
+ *   - Wishlists
+ *   summary: Get products of a wishlist
+ *   requestBody:
+ *    required: true
+ *    content:
+ *     application/json:
+ *      schema:
+ *       $ref: '#/components/schemas/GetWishlistDetails'
+ *   responses:
+ *    200:
+ *     description: Success
+ *     content:
+ *      application/json:
+ *       schema:
+ *        $ref: '#/components/schemas/GetWishlistProductsResponse'
+ *    500: 
+ *     description: Error
+ *     content:
+ *      application/json:
+ *       schema:
+ *        $ref: '#/components/schemas/ErrorResponse'
+ * components:
+ *  schemas:  
+ *   GetWishlistProductsResponse:
+ *    type: array
+ *    items:
+ *     type: object
+ *     properties:
+ *      product_id:
+ *       type: number
+ *      size:
+ *       type: string
+ *      color:
+ *       type: string
+ */
 app.post('/get-wishlist-products', async (req, res) => {
     try {
         const wishlistId = req.body.wishlistId;
@@ -214,6 +527,7 @@ const PORT = process.env.PORT || 3005;
 
 server.listen(PORT, () => {
     console.log(`server listening on port ${PORT}`);
+    swaggerDocs(app, PORT);
 })
 
 
