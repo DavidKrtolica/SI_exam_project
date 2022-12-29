@@ -12,8 +12,8 @@
       />
       <title>Products Page</title>
    </head>
-   <body>
-      <section class="vh-100" style="background-color: #eee">
+   <body style="background-color: #0e384b">
+      <section class="vh-100" >
          <div class="container h-100">
             <div
                class="row d-flex justify-content-center align-items-center h-100"
@@ -41,12 +41,19 @@
                                   <div class="collapse navbar-collapse" id="navbarSupportedContent">
                                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                                       <li class="nav-item dropdown">
-                                          <button id="categoryButton" class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                          <button id="categoryButton" class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                             Category
                                           </button>
-                                          <div id="categoryDropdownArea"class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                          <div id="categoryDropdownArea"class="dropdown-menu" aria-labelledby="categoryButton">
                                           </div>
                                       </li>
+                                      <li class="nav-item dropdown">
+                                       <button id="ratingButton" class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                         Rating
+                                       </button>
+                                       <div id="ratingDropdownArea"class="dropdown-menu" aria-labelledby="ratingButton">
+                                       </div>
+                                     </li>
                                       <li class="nav-item">
                                         <div class="input-group">
                                             <span class="input-group-text">Price</span>
@@ -63,7 +70,15 @@
                                     </div>
                                   </div>
                                 </div>
-                              </nav>
+                              </nav> 
+                              <div id="productsContainer" class="container" style="margin-left: 7rem; margin-top: 2rem;">
+                                 <h
+                                 class="text-center h4 fw-bold mb-5 mx-1 mx-md-4 mt-4 ml-5"
+                              >
+                                 Search for something in order to see the product list!
+                              </p>
+                              </div>
+                               
                         </div>
                      </div>
                   </div>
