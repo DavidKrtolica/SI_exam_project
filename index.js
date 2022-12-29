@@ -17,14 +17,17 @@ app.get("/login", (req, res) => {
 });
 
 app.get("/createWishlist", (req, res) => {
+    //req.headers.authorization
     res.sendFile(__dirname+"/public/wishlist/createWishlist.html");
 });
 
 app.get("/myWishlists", (req, res) => {
+    //req.headers.authorization
     res.sendFile(__dirname+"/public/wishlist/myWishlists.html");
 });
 
-app.get("/wishlist/:id", (req, res) => {
+app.get("/wishlist", (req, res) => {
+    //req.headers.authorization
     res.sendFile(__dirname+"/public/wishlist/wishlist.html");
 });
 
