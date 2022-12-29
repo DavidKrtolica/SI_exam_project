@@ -182,34 +182,53 @@ searchButton.addEventListener('click', async (e) => {
    displayProducts(query.data.products);
 });
 
-function selectWishlist(id) {
-   console.log("id", id);
+async function selectWishlist(id) {
    const modal = document.getElementById('wishlist-modal');
    modal.setAttribute('style', 'display:block; opacity:100');
    body = document.getElementById("modal-body");
+   const accessToken = window.localStorage.getItem("accessToken");
+   const response = await fetch('https://friends-si-exam.azurewebsites.net/wishlists', {
+      method: 'POST',
+      headers: {
+      'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ accessToken}),
+   })
+   const result = await response.json();
    //load wishlists
-   const wishlists = [{id:1, name:"first one"},{id:2, name:"xxxe"},{id:3, name:"test"}];
    let wishlistText = '';
-   if (wishlists.length) {
-      wishlistText = `<form onsubmit="insertIntoWishlist(event)">`
-      wishlists.map(wishlist => {
-         wishlistText += `<input type="radio" id="${wishlist.id}-wishlist" name="wishlist" value="${wishlist.id}">
-         <label for="${wishlist.id}-wishlist">${wishlist.name}</label><br>`
+   if (result.length) {
+      wishlistText = `<form onsubmit="insertIntoWishlist(event)">
+      <input type="text" hidden value=${id} name="productId">`
+      result.map(wishlist => {
+         wishlistText += `<input type="radio" id="${wishlist.wishlist_id}-wishlist" name="wishlist" value="${wishlist.wishlist_id}">
+         <label for="${wishlist.wishlist_id}-wishlist">${wishlist.wishlist_name}</label><br>`
       })
-      wishlistText += `<input type="submit" value="Submit"></form>`
+      wishlistText += `<input type="submit" value="Submit" class="btn btn-primary"></form>`
    } else {
       wishlistText = "<p>No wishlists available.</p>"
    }
-   console.log(body);
    body.innerHTML = wishlistText;
 }
 
-function insertIntoWishlist(event) {
+async function insertIntoWishlist(event) {
    //insert into wishlist
    event.preventDefault();
-   console.log(event);
-   console.log(event.target.elements.wishlist.value)
-   closeModal();
+   const productId = event.target.elements.productId.value;
+   const wishlistId = event.target.elements.wishlist.value;
+   const accessToken = window.localStorage.getItem("accessToken");
+   const result = await fetch('https://friends-si-exam.azurewebsites.net/add-product-to-wishlist', {
+      method: 'POST',
+      headers: {
+      'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ accessToken, wishlistId, productId, size: null, color: null}),
+   })
+   if (result.status == 200) {
+      closeModal();
+   } else {
+      alert("Something went wrong. Please try again later.");
+   }
 }
 
 function closeModal() {
