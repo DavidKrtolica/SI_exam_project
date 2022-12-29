@@ -142,12 +142,17 @@ const displayProducts = (products) => {
          detailsCol.classList.add('col');
          buttonsRow.appendChild(detailsCol);
 
-         const addButton = document.createElement('button');
+         const addButton = document.createElement('a');
          addButton.id = `addButton${i}`;
          addButton.classList.add('btn');
          addButton.classList.add('btn-outline-primary');
          addButton.type = 'button';
          addButton.innerText = 'Wishlist';
+         addButton.href = "#wishlist-modal";
+         addButton.setAttribute('data-toggle', "modal");
+         addButton.onclick = function() {
+            selectWishlist(product.id);
+         };
          wishlistCol.appendChild(addButton);
 
          const detailsButton = document.createElement('a');
@@ -176,3 +181,38 @@ searchButton.addEventListener('click', async (e) => {
    productsContainer.innerHTML = '';
    displayProducts(query.data.products);
 });
+
+function selectWishlist(id) {
+   console.log("id", id);
+   const modal = document.getElementById('wishlist-modal');
+   modal.setAttribute('style', 'display:block; opacity:100');
+   body = document.getElementById("modal-body");
+   //load wishlists
+   const wishlists = [{id:1, name:"first one"},{id:2, name:"xxxe"},{id:3, name:"test"}];
+   let wishlistText = '';
+   if (wishlists.length) {
+      wishlistText = `<form onsubmit="insertIntoWishlist(event)">`
+      wishlists.map(wishlist => {
+         wishlistText += `<input type="radio" id="${wishlist.id}-wishlist" name="wishlist" value="${wishlist.id}">
+         <label for="${wishlist.id}-wishlist">${wishlist.name}</label><br>`
+      })
+      wishlistText += `<input type="submit" value="Submit"></form>`
+   } else {
+      wishlistText = "<p>No wishlists available.</p>"
+   }
+   console.log(body);
+   body.innerHTML = wishlistText;
+}
+
+function insertIntoWishlist(event) {
+   //insert into wishlist
+   event.preventDefault();
+   console.log(event);
+   console.log(event.target.elements.wishlist.value)
+   closeModal();
+}
+
+function closeModal() {
+   const modal = document.getElementById('wishlist-modal');
+   modal.setAttribute('style', 'display:none; opacity:0');
+}
