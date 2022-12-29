@@ -3,7 +3,7 @@ const gqlRquest = async (query, variables, operationName) => {
    const headers = {
       'content-type': 'application/json',
       //Send token obviously - this is how You retrieve it from local storage! 
-      'Authorization': window.localStorage.getItem("accessToken")
+      'Authorization': 'Bearer '+window.localStorage.getItem("accessToken")
    };
    const graphqlQuery = {
       operationName,
