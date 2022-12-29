@@ -20,7 +20,7 @@ class ProductsSpider(scrapy.Spider):
                 yield request
     
     def parseInCategory(self, response, category_name):
-        for subcategory in response.css("div.pr-1rj4gr0"):
+        for subcategory in response.css("div.pr-1q5cn7p"):
             #open each category to display list of subcategories
             link = subcategory.xpath('div/a/@href').get()
             subcategory_name = subcategory.css('div.pr-13b1e5n').xpath('div/@title').get()
