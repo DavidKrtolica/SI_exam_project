@@ -1,6 +1,12 @@
-//URL ENDPOINT FOR MAKING THE POST REQUEST TO THE EXPOSED AUTH_SERVICE OF THE OTHER GROUP
-//FOR NOW, WE ARE USING OUR OWN SERVICE HOSTED ON AZURE, SHOULD ALSO BE A SECRET/IN THE .ENV 
-const url = "https://authentication-service-si.azurewebsites.net/auth/login";
+//URL ENDPOINT FOR MAKING THE POST REQUEST TO THE EXPOSED AUTH_SERVICE (FOR NOW, OUR OWN)
+const url = new URL("https://authentication-service-si.azurewebsites.net/auth/login");
+
+//INVITE FRIENDS CODE QUERY PARAM
+const params = new URLSearchParams(window.location.search);
+const code = params.get('code');
+if(code != undefined) {
+    url.searchParams.set('code', code);
+}
 
 //FETCH FUNCTION FOR EXECUTING THE POST REQUEST
 function submitLogin() {
@@ -21,11 +27,10 @@ function submitLogin() {
         if(response.status == 'Unauthorized') {
             alert("Error occured - "+response.description);    
         } else {
-            //console.log(JSON.stringify(response));
-            //console.log(response);
-            //STATUS SUCCESS - WE GET ACCESS AND REFRESH TOKEN
-            console.log("THIS IS HOW YOU ACCESS THE ACCESS TOKEN: "+response.data.accessToken);
-            console.log("THIS IS HOW YOU ACCESS THE REFRESH TOKEN: "+response.data.refreshToken);
+            window.localStorage.setItem("accessToken", response.data.accessToken);
+            window.localStorage.setItem("refreshToken", response.data.refreshToken);
+            //ADD FETCH WITH HEADER AUTH
+            window.location.assign("/myWishlists");
         }
     });
 };
