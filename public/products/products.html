@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="UTF-8" />
+      <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link
+         href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
+         rel="stylesheet"
+         integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi"
+         crossorigin="anonymous"
+      />
+      <title>Products Page</title>
+   </head>
+   <body style="background-color: #0e384b">
+      <section class="vh-100" >
+         <div class="container h-100">
+            <div
+               class="row d-flex justify-content-center align-items-center h-100"
+            >
+               <div class="col-lg-12 col-xl-11">
+                  <div class="card text-black" style="border-radius: 25px">
+                     <div
+                        class="card-body p-md-5"
+                        style="
+                           padding-bottom: 0 !important;
+                           padding-top: 1.5rem !important;
+                        "
+                     >
+                        <div class="row justify-content-center">
+                           <div
+                              class="col-md-20 col-lg-12 col-xl-15 order-2 order-lg-1"
+                           >
+                              <p
+                                 class="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4"
+                              >
+                                 Products
+                              </p>
+                             <nav class="navbar navbar-expand-lg bg-light">
+                                <div class="container-fluid">
+                                  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                                      <li class="nav-item dropdown">
+                                          <button id="categoryButton" class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Category
+                                          </button>
+                                          <div id="categoryDropdownArea"class="dropdown-menu" aria-labelledby="categoryButton">
+                                          </div>
+                                      </li>
+                                      <li class="nav-item dropdown">
+                                       <button id="ratingButton" class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                         Rating
+                                       </button>
+                                       <div id="ratingDropdownArea"class="dropdown-menu" aria-labelledby="ratingButton">
+                                       </div>
+                                     </li>
+                                      <li class="nav-item">
+                                        <div class="input-group">
+                                            <span class="input-group-text">Price</span>
+                                            <span class="input-group-text">Min $</span>
+                                            <input id="minPrice" type="number" aria-label="minPrice" class="form-control">
+                                            <span class="input-group-text">Max $</span>
+                                            <input id="maxPrice" type="number" aria-label="maxPrice" class="form-control">
+                                          </div>
+                                      </li>
+                                    </ul>
+                                    <div class="d-flex" role="search">
+                                      <input id="searchTerm" class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                                      <button id="searchButton" class="btn btn-outline-primary" type="submit">Search</button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </nav> 
+                              <div id="productsContainer" class="container" style="margin-left: 7rem; margin-top: 2rem;">
+                                 <h
+                                 class="text-center h4 fw-bold mb-5 mx-1 mx-md-4 mt-4 ml-5"
+                              >
+                                 Search for something in order to see the product list!
+                              </p>
+                              </div>
+                               
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </section>
+      <script src="./gqlRequest.js"></script>
+      <script src="./products.js"></script>
+      <script
+         src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
+         integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
+         crossorigin="anonymous"
+      ></script>
+   </body>
+</html>
