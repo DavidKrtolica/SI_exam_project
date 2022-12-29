@@ -1,3 +1,11 @@
+//PERSISTING VERIFICATION FOR ACCESS TOKEN, SIMPLE
+if(window.localStorage.getItem("accessToken") == null || window.localStorage.getItem("refreshToken") == null) {
+    document.body.style.filter = "blur(2px)";
+    document.body.style.pointerEvents = "none";
+    window.location = "/login";
+    alert("You haven been logged-out! Login again to access Your Wishlists...");
+}
+
 //NAVIGATION
 function navigateToWishlist(e) {
     window.location = `/wishlist?id=${document.activeElement.id}`;

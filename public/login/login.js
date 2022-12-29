@@ -34,3 +34,8 @@ function submitLogin() {
         }
     });
 };
+
+//CHECK IF TOKEN STILL EXISTS
+if(window.localStorage.getItem("accessToken") != null) {
+    window.location = "/products";
+}

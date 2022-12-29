@@ -13,26 +13,22 @@ app.get('/register', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-   res.sendFile(__dirname + '/public/login/login.html');
+    res.sendFile(__dirname + '/public/login/login.html');
 });
 
 app.get('/products', (req, res) => {
-    //req.headers.authorization
-   res.sendFile(__dirname + '/public/products/products.html');
+    res.sendFile(__dirname + '/public/products/products.html');
 });
 
 app.get("/createWishlist", (req, res) => {
-    //req.headers.authorization
     res.sendFile(__dirname+"/public/wishlist/createWishlist.html");
 });
 
 app.get("/myWishlists", (req, res) => {
-    //req.headers.authorization
     res.sendFile(__dirname+"/public/wishlist/myWishlists.html");
 });
 
 app.get("/wishlist", (req, res) => {
-    //req.headers.authorization
     res.sendFile(__dirname+"/public/wishlist/wishlist.html");
 });
 
