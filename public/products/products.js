@@ -129,7 +129,7 @@ const displayProducts = (products) => {
 
          const rating = document.createElement('h6');
          rating.classList.add = 'card-text';
-         rating.innerText = `Rating: $${product.rating}`;
+         rating.innerText = `Rating: ${product.rating}`;
          ratingCol.appendChild(rating);
 
          const buttonsRow = document.createElement('div');
