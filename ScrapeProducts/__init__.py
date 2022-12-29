@@ -41,11 +41,11 @@ def main(mytimer: func.TimerRequest) -> None:
     connection_string = os.environ["CONNECTION_STRING"]
 
     blob_service_client = BlobServiceClient.from_connection_string(connection_string)
-    container_client = ContainerClient.from_connection_string(connection_string, container_name="products")
+    container_client = ContainerClient.from_connection_string(connection_string, container_name="samples-workitems")
 
     #print(container_client)
     # Create a blob client using the local file name as the name for the blob
-    blob_client = blob_service_client.get_blob_client(container="products", blob=productsFileBlob)
+    blob_client = blob_service_client.get_blob_client(container="samples-workitems", blob=productsFileBlob)
     #print(blob_client)
     # Upload the created file
     with open(file=productsFile, mode="rb") as data:

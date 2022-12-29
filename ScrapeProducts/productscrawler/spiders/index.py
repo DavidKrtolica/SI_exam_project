@@ -1,4 +1,4 @@
-import scrapy
+"""import scrapy
 from twisted.internet import reactor
 from scrapy.crawler import CrawlerRunner
 from ProductsSpider import ProductsSpider
@@ -13,7 +13,7 @@ d = process.crawl(ProductsSpider)
 d.addBoth(lambda _: reactor.stop())
 reactor.run() # the script will block here until the crawling is finished
 #process.crawl(ProductsSpider)
-#process.start() # the script will block here until the crawling is finished
+#process.start() # the script will block here until the crawling is finished"""
 """
 blob_service_client = BlobServiceClient.from_connection_string("DefaultEndpointsProtocol=https;AccountName=testingscrapeddata;AccountKey=CVgLErjeeYlRqDwfBuOCrjpne5mW/QTT5ciFTRhozzwOGPBU5GE9yBTcznUdKVTQKoZouXnFilzs+AStDmVsQw==;EndpointSuffix=core.windows.net")
 
