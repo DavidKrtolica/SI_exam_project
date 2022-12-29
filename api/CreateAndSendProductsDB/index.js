@@ -18,8 +18,9 @@ let insertedColor = {};
 const productsFile = "products.db";
 const path = "C:/home/";
 
-module.exports = async function (context, req) {
-    //context.log("JavaScript blob trigger function processed blob \n Blob:", context.bindingData.blobTrigger, "\n Blob Size:", myBlob.length, "Bytes");
+module.exports = async function (context, myBlob) {
+    //context.log("JavaScript blob trigger function processed blob \n Blob:", context.bindingData.blobTrigger, "\n Blob Size:", myBlob.length, "Bytes Parse", JSON.parse(myBlob) ,"MyBlob",myBlob, " context ", context );
+    const products = JSON.parse(myBlob);
     const knex = getKnexInstance();
     if (fs.existsSync(`${path}${productsFile}`)) {
         fs.unlinkSync(`${path}${productsFile}`);
@@ -30,8 +31,8 @@ module.exports = async function (context, req) {
     context.log('Insert basic.');
     await insertColorSize(context, knex);
     //context.log('req.body', req.body, req.body["data"], req.body.data)
-    for (let i = 0; i < req.body.data.length; i++) {
-        let product = req.body.data[i];
+    for (let i = 0; i < products.length; i++) {
+        let product = products[i];
         //context.log("product, ", product);
         //insert category if not already in
         await insertCategory(product, knex);

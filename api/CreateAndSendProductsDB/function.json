@@ -1,16 +1,11 @@
 {
-  "disabled": false,    
-  "bindings": [
-      {
-          "authLevel": "function",
-          "type": "httpTrigger",
-          "direction": "in",
-          "name": "req"
-      },
-      {
-          "type": "http",
-          "direction": "out",
-          "name": "res"
-      }
-  ]
+    "bindings": [
+        {
+            "name": "myBlob",
+            "type": "blobTrigger",
+            "direction": "in",
+            "path": "samples-workitems/products.json",
+            "connection": "AzureWebJobsStorage"
+        }
+    ]
 }
