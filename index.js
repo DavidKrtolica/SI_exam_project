@@ -17,6 +17,7 @@ app.get('/login', (req, res) => {
 });
 
 app.get('/products', (req, res) => {
+    //req.headers.authorization
    res.sendFile(__dirname + '/public/products/products.html');
 });
 
