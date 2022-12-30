@@ -57,8 +57,7 @@ const getProducts = async (productIds) => {
   }`;
 
    const query = await gqlRequest(PRODUCTS_QUERY, { productIds });
-   console.log(query);
-   return query.data.proucts;
+   return query.data.products;
 };
 
 const getWishlistProducts = async () => {
@@ -116,21 +115,76 @@ const main = async () => {
          throw new Error('An error occured');
       } else {
          const wishlistProducts = await wishlistProductsResponse.json();
-         const productIds = wishlistProducts.map(
-            (product) => product.product_id
+         const productIds = wishlistProducts.map((product) =>
+            Number(product.product_id)
          );
          const products = await getProducts(productIds);
+         const productsList = document.getElementById('products-list');
+         for (let i = 0; i < products.length; i += 3) {
+            const productRow = products.slice(i, i + 3);
 
-         for (const product of products) {
-            const productsList = document.getElementById('products-list');
-            /*newLiElement = document.createElement('li');
-            newText = document.createTextNode(
-               `${product.product_id}, ${product.size}, ${product.color}`
-            );
-            newLiElement.appendChild(newText);
-            newLiElement.classList.add('list-group-item');
-            productsList.appendChild(newLiElement);*/
-            console.log(product);
+            const row = document.createElement('div');
+            row.classList.add('row');
+            row.classList.add('mb-3');
+
+            productRow.map((product) => {
+               const col = document.createElement('div');
+               col.classList.add('col');
+               row.appendChild(col);
+
+               const card = document.createElement('div');
+               card.classList.add('card');
+               card.style = 'width: 18rem';
+               col.appendChild(card);
+
+               const img = document.createElement('img');
+               img.src = product.image.link;
+               img.classList.add('card-img-top');
+               card.appendChild(img);
+
+               const cardBody = document.createElement('div');
+               cardBody.classList.add('card-body');
+               card.appendChild(cardBody);
+
+               const name = document.createElement('h5');
+               name.classList.add('card-title');
+               name.innerText = product.name;
+               cardBody.appendChild(name);
+
+               const description = document.createElement('p');
+               description.classList.add('card-text');
+               description.innerText = product.description;
+               cardBody.appendChild(description);
+
+               const priceRatingRow = document.createElement('div');
+               priceRatingRow.classList.add('row');
+               cardBody.appendChild(priceRatingRow);
+               const priceCol = document.createElement('div');
+               priceCol.classList.add('col');
+               priceRatingRow.appendChild(priceCol);
+               const ratingCol = document.createElement('div');
+               ratingCol.classList.add('col');
+               priceRatingRow.appendChild(ratingCol);
+
+               const price = document.createElement('h6');
+               price.classList.add = 'card-text';
+               price.innerText = `Price: $${product.price}`;
+               priceCol.appendChild(price);
+
+               const rating = document.createElement('h6');
+               rating.classList.add = 'card-text';
+               rating.innerText = `Rating: ${product.rating}`;
+               ratingCol.appendChild(rating);
+
+               const detailsButton = document.createElement('a');
+               detailsButton.href = product.link;
+               detailsButton.classList.add('btn');
+               detailsButton.classList.add('btn-outline-success');
+               detailsButton.innerText = 'Details';
+               cardBody.appendChild(detailsButton);
+            });
+
+            productsList.appendChild(row);
          }
       }
    } catch (error) {}

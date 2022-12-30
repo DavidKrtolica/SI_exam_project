@@ -1,9 +1,9 @@
-const gqlRquest = async (query, variables, operationName) => {
+const gqlRequest = async (query, variables, operationName) => {
    const endpoint = 'https://si-products.azurewebsites.net/graphql';
    const headers = {
       'content-type': 'application/json',
-      //Send token obviously - this is how You retrieve it from local storage! 
-      'Authorization': 'Bearer '+window.localStorage.getItem("accessToken")
+      //Send token obviously - this is how You retrieve it from local storage!
+      Authorization: 'Bearer ' + window.localStorage.getItem('accessToken'),
    };
    const graphqlQuery = {
       operationName,

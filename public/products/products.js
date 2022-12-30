@@ -36,7 +36,7 @@ const ratingDropdownArea = document.getElementById('ratingDropdownArea');
 
 window.onload = async () => {
    //Adding available categories to the dropdown
-   const categoriesQuery = await gqlRquest(CATEGORIES_QUERY);
+   const categoriesQuery = await gqlRequest(CATEGORIES_QUERY);
    categoriesQuery.data.simpleCategories.map((category, index) => {
       const element = document.createElement('a');
       element.id = `category${index}`;
@@ -65,8 +65,8 @@ availableRatings.map((rating, index) => {
 });
 
 const displayProducts = (products) => {
-   for (let i = 0; i < products.length; i += 2) {
-      const productRow = products.slice(i, i + 2);
+   for (let i = 0; i < products.length; i += 3) {
+      const productRow = products.slice(i, i + 3);
 
       const row = document.createElement('div');
       row.classList.add('row');
@@ -173,7 +173,7 @@ searchButton.addEventListener('click', async (e) => {
    };
    console.log('Send request with search filter: ', searchFilter);
 
-   const query = await gqlRquest(PRODUCTS_QUERY, { searchFilter });
+   const query = await gqlRequest(PRODUCTS_QUERY, { searchFilter });
    productsContainer.innerHTML = '';
    displayProducts(query.data.products);
 });
