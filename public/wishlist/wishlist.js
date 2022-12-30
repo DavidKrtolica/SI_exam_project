@@ -210,6 +210,7 @@ const submitInvite = () => {
    let wishlistId = params.id;
    const wishlistName = document.getElementById('wishlist-name').textContent;
    const emailTo = document.getElementById('form3Example3c').value;
+   const accessToken = window.localStorage.getItem('accessToken');
    fetch('https://friends-si-exam.azurewebsites.net/invite', {
       method: 'POST',
       headers: {
