@@ -92,7 +92,7 @@ export const typeDefs = gql`
       "Get product by id"
       product(id: Int!): Product
       "Get a list of products. Optional search filter"
-      products(searchFilter: SearchFilter, productIds: [ID]): [Product]
+      products(searchFilter: SearchFilter, productIds: [Int]): [Product]
    }
 `;
 
