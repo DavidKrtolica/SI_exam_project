@@ -92,7 +92,7 @@ export const typeDefs = gql`
       "Get product by id"
       product(id: Int!): Product
       "Get a list of products. Optional search filter"
-      products(searchFilter: SearchFilter): [Product]
+      products(searchFilter: SearchFilter, productIds: [ID]): [Product]
    }
 `;
 
@@ -120,8 +120,14 @@ export const resolvers = {
       product: async (_, { id }) => {
          return await productData.fetchById(id);
       },
-      products: async (_, { searchFilter }) => {
-         return await productData.fetch(searchFilter);
+      products: async (_, { searchFilter, productIds }) => {
+         if (productIds) {
+            return await productData.fetchByIds(productIds);
+         }
+         if (searchFilter) {
+            return await productData.fetch(searchFilter);
+         }
+         return await productData.fetchAll();
       },
    },
    /*Mutation: {

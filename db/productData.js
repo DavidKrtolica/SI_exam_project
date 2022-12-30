@@ -3,6 +3,9 @@ import { knexInstance as knex } from './db.js';
 export const fetchById = async (id) =>
    await knex.select('*').from('products').where('id', id).first();
 
+export const fetchByIds = async (productIds) =>
+   await knex.select('*').from('products').whereIn('id', productIds);
+
 export const fetchAll = async () => await knex.select('*').from('products');
 
 export const fetch = async ({
